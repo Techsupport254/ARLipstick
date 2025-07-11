@@ -1,0 +1,42 @@
+{
+	"name": "ar-lipstick-next",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint"
+	},
+	"dependencies": {
+		"@mediapipe/tasks-vision": "^0.10.22-rc.20250304",
+		"@tensorflow/tfjs": "^4.22.0",
+		"@tensorflow/tfjs-backend-webgl": "^4.22.0",
+		"antd": "^5.26.4",
+		"cloudinary": "^2.7.0",
+		"dotenv": "^17.2.0",
+		"firebase": "^11.10.0",
+		"firebase-admin": "^13.4.0",
+		"next": "15.3.5",
+		"onnxruntime-web": "^1.22.0",
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0",
+		"react-icons": "^5.5.0"
+	},
+	"devDependencies": {
+		"@eslint/eslintrc": "^3",
+		"@tailwindcss/postcss": "^4.1.11",
+		"@types/jest": "^30.0.0",
+		"@types/node": "^20",
+		"@types/react": "^19",
+		"@types/react-dom": "^19",
+		"eslint": "^9",
+		"eslint-config-next": "15.3.5",
+		"jest": "^30.0.4",
+		"jest-environment-jsdom": "^30.0.4",
+		"tailwindcss": "^4",
+		"ts-jest": "^29.4.0",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.8.3"
+	}
+}
