@@ -33,9 +33,14 @@ function getFirebaseAdminConfig() {
 }
 
 // Use global to prevent re-initialization in dev
-if (!(globalThis as any)._firebaseAdminInitialized) {
+if (
+	!(globalThis as unknown as { _firebaseAdminInitialized: boolean })
+		._firebaseAdminInitialized
+) {
 	admin.initializeApp(getFirebaseAdminConfig());
-	(globalThis as any)._firebaseAdminInitialized = true;
+	(
+		globalThis as unknown as { _firebaseAdminInitialized: boolean }
+	)._firebaseAdminInitialized = true;
 }
 
 export async function POST(req: NextRequest) {

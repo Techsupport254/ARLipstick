@@ -19,7 +19,7 @@ const columns = [
 	},
 ];
 
-const data: any[] = [];
+const data: unknown[] = [];
 
 export default function ApproveOrdersPage() {
 	return (

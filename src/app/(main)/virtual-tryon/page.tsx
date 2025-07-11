@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, Suspense } from "react";
 import { startLipstickAR } from "../../../ar/arUtils";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -74,7 +74,7 @@ function ARLipstickTryOn({ color }: { color: string }) {
 	);
 }
 
-export default function VirtualTryOnPage() {
+function VirtualTryOnContent() {
 	const [products, setProducts] = useState<LipstickProduct[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
@@ -198,7 +198,7 @@ export default function VirtualTryOnPage() {
 											{product.name}
 										</div>
 										<div
-											className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 border-pink-200 mt-1"
+											className="w-6 h-6 rounded-full border-2 border-pink-400 mt-1"
 											style={{ background: product.color }}
 										/>
 									</button>
@@ -216,5 +216,13 @@ export default function VirtualTryOnPage() {
 			</main>
 			<Footer />
 		</div>
+	);
+}
+
+export default function VirtualTryOnPage() {
+	return (
+		<Suspense>
+			<VirtualTryOnContent />
+		</Suspense>
 	);
 }

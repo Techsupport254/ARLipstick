@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as admin from "../../../firebaseAdmin";
-import type { GlobalOrder, Order } from "../../../types/models";
+import type { GlobalOrder } from "../../../types/models";
 
-export async function PATCH(
-	req: NextRequest,
-	{ params }: { params: { orderId: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ orderId: string }> }) {
+	const { orderId } = await params;
 	try {
-		const { orderId } = params;
 		if (!orderId) {
 			return NextResponse.json({ message: "Missing orderId" }, { status: 400 });
 		}
@@ -40,4 +37,4 @@ export async function PATCH(
 			{ status: 500 }
 		);
 	}
-} 
+}

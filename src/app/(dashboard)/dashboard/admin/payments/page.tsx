@@ -1,5 +1,5 @@
 "use client";
-import { Table, Empty } from "antd";
+import { Table } from "antd";
 import "antd/dist/reset.css";
 import { FaCreditCard } from "react-icons/fa";
 import { useEffect, useState } from "react";
@@ -146,7 +146,7 @@ export default function AdminPaymentsPage() {
 				const usersRes = await fetch("/api/users", {
 					headers: { Authorization: `Bearer ${idToken}` },
 				});
-				let usersMap: Record<
+				const usersMap: Record<
 					string,
 					{ displayName?: string; email?: string; photoURL?: string }
 				> = {};
@@ -173,10 +173,10 @@ export default function AdminPaymentsPage() {
 						data.error || data.message || "Failed to fetch payments"
 					);
 				}
-				let payments = await res.json();
+				const payments: PaymentItem[] = await res.json();
 				// Sort by createdAt descending
 				payments.sort(
-					(a: any, b: any) =>
+					(a: PaymentItem, b: PaymentItem) =>
 						new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
 				);
 				setData(payments);

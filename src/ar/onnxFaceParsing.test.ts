@@ -7,7 +7,7 @@ import {
 jest.mock("onnxruntime-web", () => {
 	class Tensor {
 		data: Float32Array;
-		constructor(type: string, data: Float32Array, shape: number[]) {
+		constructor(type: string, data: Float32Array) {
 			this.data = data;
 		}
 	}
@@ -15,7 +15,7 @@ jest.mock("onnxruntime-web", () => {
 		static async create() {
 			return new InferenceSession();
 		}
-		async run(feeds: any) {
+		async run() {
 			// Simulate output: (1, 19, 512, 512) with lips at class 12 and 13
 			const size = 512 * 512;
 			const output = new Float32Array(19 * size);
@@ -40,7 +40,7 @@ global.HTMLCanvasElement.prototype.getContext = function () {
 		}),
 		putImageData: jest.fn(),
 		drawImage: jest.fn(),
-	} as any;
+	} as unknown as CanvasRenderingContext2D;
 };
 
 describe("onnxFaceParsing", () => {

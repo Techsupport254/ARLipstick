@@ -1,5 +1,5 @@
 "use client";
-import { Table, Button } from "antd";
+import { Table } from "antd";
 import "antd/dist/reset.css";
 import { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
@@ -10,7 +10,7 @@ const columns = [
 	{
 		title: "User",
 		key: "user",
-		render: (_: any, user: User) => (
+		render: (_: unknown, user: User) => (
 			<span className="flex items-center gap-3">
 				<Image
 					src={user.photoURL || "/ar-lipstick-logo.svg"}

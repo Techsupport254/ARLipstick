@@ -2,10 +2,7 @@
 
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import Image from "next/image";
-import { getAuth } from "firebase/auth";
 import type { Product } from "../../types/models";
 import ProductGrid from "../../components/ProductGrid";
 
@@ -13,46 +10,6 @@ export default function Shop() {
 	const [products, setProducts] = useState<Product[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
-	const [cartMessage, setCartMessage] = useState("");
-
-	async function handleAddToCart(product: Product) {
-		try {
-			const auth = getAuth();
-			const user = auth.currentUser;
-			if (!user) {
-				setCartMessage("Please login to add to cart.");
-				return;
-			}
-			const idToken = await user.getIdToken();
-			const res = await fetch("/api/cart", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${idToken}`,
-				},
-				body: JSON.stringify({
-					productId: product.id,
-					quantity: 1,
-					name: product.name,
-					price: product.price,
-					imageUrl: product.imageUrl,
-				}),
-			});
-			if (!res.ok) {
-				const data = await res.json();
-				throw new Error(data.message || "Failed to add to cart");
-			}
-			setCartMessage("Added to cart!");
-			setTimeout(() => setCartMessage(""), 1500);
-		} catch (err: unknown) {
-			if (err instanceof Error) {
-				setCartMessage(err.message || "Error adding to cart");
-			} else {
-				setCartMessage("Error adding to cart");
-			}
-			setTimeout(() => setCartMessage(""), 2000);
-		}
-	}
 
 	useEffect(() => {
 		async function fetchProducts() {
@@ -95,11 +52,6 @@ export default function Shop() {
 					</div>
 				) : (
 					<ProductGrid products={products} />
-				)}
-				{cartMessage && (
-					<div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-white/90 border border-pink-200 shadow-xl rounded-full px-4 sm:px-8 py-2 sm:py-4 text-base sm:text-lg font-bold text-green-600 z-50 animate-fade-in">
-						{cartMessage}
-					</div>
 				)}
 			</main>
 			<Footer />

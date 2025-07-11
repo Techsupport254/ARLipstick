@@ -11,7 +11,7 @@ async function getUserFromRequest(req: NextRequest) {
 }
 
 // GET: Fetch all payments (admin)
-export async function GET(req: NextRequest) {
+export async function GET() {
 	try {
 		const snapshot = await admin.admin.firestore().collection("payments").get();
 		const payments: GlobalPayment[] = snapshot.docs.map(

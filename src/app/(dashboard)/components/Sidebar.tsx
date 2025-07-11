@@ -6,7 +6,6 @@ import {
 	AiOutlineUser,
 	AiOutlineAppstore,
 	AiOutlinePlusSquare,
-	AiOutlineCheckCircle,
 	AiOutlineTeam,
 	AiOutlineShoppingCart,
 	AiOutlineShopping,
@@ -14,49 +13,23 @@ import {
 } from "react-icons/ai";
 
 type SidebarProps = {
-	user: {
-		displayName: string;
-		email: string;
-		photoURL: string | null;
-	} | null;
+	// user: {
+	// 	displayName: string;
+	// 	email: string;
+	// 	photoURL: string | null;
+	// } | null;
 	isAdmin: boolean;
 	onLogout: () => void;
 	current: string;
 };
 
-const navLinks = [
-	{ name: "Dashboard", href: "/dashboard", icon: <AiOutlineHome size={20} /> },
-	{
-		name: "Profile",
-		href: "/dashboard/profile",
-		icon: <AiOutlineUser size={20} />,
-	},
-	{
-		name: "Orders",
-		href: "/dashboard/orders",
-		icon: <AiOutlineShopping size={20} />,
-	},
-	{
-		name: "Cart",
-		href: "/dashboard/cart",
-		icon: <AiOutlineShoppingCart size={20} />,
-	},
-	{
-		name: "Payment",
-		href: "/dashboard/payment",
-		icon: <AiOutlineCreditCard size={20} />,
-	},
-];
-
 export default function Sidebar({
-	user,
+	// user,
 	isAdmin,
 	onLogout,
 	current,
 	open = true,
 }: SidebarProps & { open?: boolean }) {
-	const isAdminRoute = current.startsWith("/dashboard/admin");
-
 	// Admin links
 	const adminLinks = [
 		{

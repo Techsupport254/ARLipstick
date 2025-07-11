@@ -21,6 +21,9 @@ export interface Product {
 	stock?: number;
 	createdAt?: string;
 	updatedAt?: string;
+	colorName?: string; // Added for color name support
+	hexColor?: string; // Added for hex color support
+	oldPrice?: number; // Added for old price support
 }
 
 // Cart item (subcollection under user)

@@ -1,21 +1,8 @@
 "use client";
-import {
-	Table,
-	Button,
-	Spin,
-	Empty,
-	Modal,
-	Form,
-	Input,
-	InputNumber,
-	message,
-	Upload,
-} from "antd";
+import { Table, Button, Spin, Empty } from "antd";
 import "antd/dist/reset.css";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { UploadOutlined } from "@ant-design/icons";
-import type { RcFile } from "antd/es/upload";
 import Link from "next/link";
 
 type Product = {
@@ -34,7 +21,6 @@ export default function AdminProductsPage() {
 	const [products, setProducts] = useState<Product[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
-	const [form] = Form.useForm();
 
 	useEffect(() => {
 		async function fetchProducts() {
@@ -43,45 +29,16 @@ export default function AdminProductsPage() {
 				if (!res.ok) throw new Error("Failed to fetch products");
 				const data = await res.json();
 				setProducts(data);
-			} catch (err: any) {
-				setError(err.message || "Unknown error");
+			} catch (err: unknown) {
+				if (err instanceof Error) {
+					setError(err.message || "Unknown error");
+				}
 			} finally {
 				setLoading(false);
 			}
 		}
 		fetchProducts();
 	}, []);
-
-	const handleImageUpload = async (file: RcFile) => {
-		const toBase64 = (file: File) =>
-			new Promise<string>((resolve, reject) => {
-				const reader = new FileReader();
-				reader.readAsDataURL(file);
-				reader.onload = () => resolve(reader.result as string);
-				reader.onerror = (err) => reject(err);
-			});
-		try {
-			const base64 = await toBase64(file);
-			const uploadRes = await fetch("/api/products/upload-image", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ image: base64 }),
-			});
-			if (!uploadRes.ok) {
-				const data = await uploadRes.json();
-				throw new Error(data.message || "Cloudinary upload failed");
-			}
-			const { url } = await uploadRes.json();
-			form.setFieldsValue({ imageUrl: url });
-			message.success("Image uploaded!");
-		} catch {
-			message.error("Image upload failed. Please try again.");
-		} finally {
-			// setUploading(false); // Removed as per edit hint
-			// setUploadProgress(null); // Removed as per edit hint
-		}
-		return false; // prevent default upload
-	};
 
 	const columns = [
 		{
@@ -160,7 +117,7 @@ export default function AdminProductsPage() {
 		{
 			title: "Actions",
 			key: "actions",
-			render: (_: any, record: Product) => (
+			render: (_: unknown, record: Product) => (
 				<Link href={`/dashboard/admin/products/${record.id}/edit`}>
 					<Button type="link">Edit</Button>
 				</Link>
@@ -197,7 +154,7 @@ export default function AdminProductsPage() {
 											</span>
 										}
 									/>
-								)
+								),
 							}}
 							className="rounded-xl overflow-hidden"
 							scroll={{ x: true }}

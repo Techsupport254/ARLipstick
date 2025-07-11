@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
 import type { CartItem } from "../../types/models";
+import Image from "next/image";
 
 export default function Cart() {
 	const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -86,9 +87,11 @@ export default function Cart() {
 									className="flex items-center justify-between py-4 border-b last:border-b-0"
 								>
 									<div className="flex items-center gap-4">
-										<img
-											src={item.imageUrl || item.image}
-											alt={item.name}
+										<Image
+											src={item.imageUrl || "/ar-lipstick-logo.svg"}
+											alt={item.name || "Product image"}
+											width={64}
+											height={64}
 											className="w-16 h-16 rounded-full border-2 border-pink-200 object-cover"
 										/>
 										<div>

@@ -22,7 +22,8 @@ export interface PaystackPaymentParams {
 export function loadPaystackScript(): Promise<void> {
 	return new Promise((resolve, reject) => {
 		if (typeof window === "undefined") return reject("Not in browser");
-		if ((window as any).PaystackPop) return resolve();
+		if ((window as unknown as { PaystackPop?: unknown })?.PaystackPop)
+			return resolve();
 		const script = document.createElement("script");
 		script.src = "https://js.paystack.co/v1/inline.js";
 		script.async = true;
@@ -30,6 +31,12 @@ export function loadPaystackScript(): Promise<void> {
 		script.onerror = () => reject("Failed to load Paystack script");
 		document.body.appendChild(script);
 	});
+}
+
+declare global {
+	interface Window {
+		PaystackPop?: unknown;
+	}
 }
 
 export async function handlePaystackPayment(
@@ -45,7 +52,7 @@ export async function handlePaystackPayment(
 		throw new Error("Paystack can only be used in the browser.");
 	}
 	await loadPaystackScript();
-	if (!(window as any).PaystackPop) {
+	if (!(window as unknown as { PaystackPop?: unknown })?.PaystackPop) {
 		throw new Error(
 			"Paystack SDK not loaded. Make sure the Paystack script is included in your app."
 		);
@@ -55,7 +62,11 @@ export async function handlePaystackPayment(
 		throw new Error("User email is required for payment");
 	}
 	return new Promise((resolve, reject) => {
-		const handler = (window as any).PaystackPop.setup({
+		const handler = (
+			window.PaystackPop as {
+				setup: (config: Record<string, unknown>) => unknown;
+			}
+		)?.setup({
 			key: PAYSTACK_PUBLIC_KEY,
 			email,
 			amount: params.amount * 100, // Paystack expects amount in kobo
@@ -115,6 +126,6 @@ export async function handlePaystackPayment(
 				reject(new Error("Payment window closed"));
 			},
 		});
-		handler.openIframe();
+		(handler as unknown as { openIframe: () => void })?.openIframe();
 	});
 }

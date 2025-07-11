@@ -23,7 +23,6 @@ export default function DashboardPage() {
 	const [loading, setLoading] = useState(true);
 	const router = useRouter();
 	// Add state for profile, orders, payments, cart, stats
-	const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
 	const [orders, setOrders] = useState<Array<Record<string, unknown>>>([]);
 	const [payments, setPayments] = useState<Array<Record<string, unknown>>>([]);
 	const [stats, setStats] = useState<{
@@ -49,7 +48,6 @@ export default function DashboardPage() {
 							(u) => u.uid === firebaseUser.uid
 						) || dataProfile[0];
 				}
-				setProfile(dataProfile);
 				// Fetch orders
 				const resOrders = await fetch("/api/orders?userOnly=1", {
 					headers: { Authorization: `Bearer ${idToken}` },

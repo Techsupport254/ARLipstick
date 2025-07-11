@@ -1,17 +1,16 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Input, InputNumber, Button, message, Spin } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { Input, InputNumber, message, Spin } from "antd";
 import Image from "next/image";
 import type { RcFile } from "antd/es/upload";
+import type { Product } from "@/app/types/models";
 
 export default function EditProductPage() {
 	const router = useRouter();
 	const { id } = useParams();
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
-	const [product, setProduct] = useState<any>(null);
 	const [error, setError] = useState("");
 	const [name, setName] = useState("");
 	const [colorName, setColorName] = useState("");
@@ -30,18 +29,17 @@ export default function EditProductPage() {
 			try {
 				const res = await fetch("/api/products");
 				if (!res.ok) throw new Error("Failed to fetch products");
-				const data = await res.json();
-				const found = data.find((p: any) => p.id === id);
+				const data: Product[] = await res.json();
+				const found = data.find((p: Product) => p.id === id);
 				if (!found) throw new Error("Product not found");
-				setProduct(found);
 				setName(found.name || "");
 				setColorName(found.colorName || "");
 				setHexColor(found.hexColor || "#E11D48");
 				setPrice(found.price?.toString() || "");
 				setOldPrice(found.oldPrice?.toString() || "");
 				setStock(found.stock?.toString() || "");
-			} catch (err: any) {
-				setError(err.message || "Error fetching product");
+			} catch (err: unknown) {
+				setError((err as Error).message || "Error fetching product");
 			} finally {
 				setLoading(false);
 			}
@@ -110,8 +108,10 @@ export default function EditProductPage() {
 			}
 			message.success("Product updated successfully!");
 			router.push("/dashboard/admin/products");
-		} catch (err: any) {
-			setError(err.message || "Failed to update product. Please try again.");
+		} catch (err: unknown) {
+			setError(
+				(err as Error).message || "Failed to update product. Please try again."
+			);
 		} finally {
 			setSaving(false);
 		}

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { admin } from "../../firebaseAdmin";
 import type { Product } from "../../types/models";
-import { NextRequest } from "next/server";
 import cloudinary from "cloudinary";
 
 cloudinary.v2.config({
@@ -74,29 +73,6 @@ export async function POST(req: Request) {
 	} catch (error) {
 		return NextResponse.json(
 			{ message: "Failed to add product", error: (error as Error).message },
-			{ status: 500 }
-		);
-	}
-}
-
-export async function POST_upload_image(req: NextRequest) {
-	try {
-		const data = await req.json();
-		const { image } = data; // image should be a base64 string or data URL
-		if (!image) {
-			return NextResponse.json(
-				{ message: "No image provided" },
-				{ status: 400 }
-			);
-		}
-		const uploadRes = await cloudinary.v2.uploader.upload(image, {
-			folder: "lipsticks",
-			resource_type: "image",
-		});
-		return NextResponse.json({ url: uploadRes.secure_url });
-	} catch (error) {
-		return NextResponse.json(
-			{ message: "Cloudinary upload failed", error: (error as Error).message },
 			{ status: 500 }
 		);
 	}

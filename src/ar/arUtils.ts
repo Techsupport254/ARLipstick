@@ -509,7 +509,9 @@ export async function startLipstickAR(
 		} else {
 			// Clear canvas if no face
 			const ctx = canvasEl.getContext("2d");
-			ctx && ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+			if (ctx) {
+				ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+			}
 		}
 		requestAnimationFrame(render);
 	}

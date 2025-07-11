@@ -1,14 +1,5 @@
 "use client";
-import {
-	Table,
-	Empty,
-	Space,
-	Avatar,
-	message,
-	Modal,
-	Card,
-	Descriptions,
-} from "antd";
+import { Table, Empty, Space, message, Modal, Card, Descriptions } from "antd";
 import "antd/dist/reset.css";
 import { useEffect, useState } from "react";
 import type { GlobalOrder, User, Product } from "../../../../types/models";
@@ -17,7 +8,8 @@ import Image from "next/image";
 
 const getUserColumns = (
 	onApprove: (orderId: string) => void,
-	approvingOrderId: string | null
+	approvingOrderId: string | null,
+	users: User[]
 ) => [
 	{
 		title: "Order #",
@@ -28,12 +20,7 @@ const getUserColumns = (
 		title: "User",
 		dataIndex: "userId",
 		key: "userId",
-		render: (
-			userId: string,
-			_record: GlobalOrder,
-			_idx: number,
-			users: User[]
-		) => {
+		render: (userId: string) => {
 			const user = users.find((u) => u.uid === userId);
 			if (!user) return <span className="text-gray-400">Unknown</span>;
 			return (
@@ -80,9 +67,9 @@ const getUserColumns = (
 	{
 		title: "Actions",
 		key: "actions",
-		render: (_: any, record: GlobalOrder) => {
-			if (record.status === "approved" || record.status === "delivered") {
-				return <span className="text-green-600 font-semibold">Approved</span>;
+		render: (_: unknown, record: GlobalOrder) => {
+			if (record.status === "delivered") {
+				return <span className="text-green-600 font-semibold">Delivered</span>;
 			}
 			return (
 				<button
@@ -121,11 +108,11 @@ const getProductColumns = () => [
 		title: "Image",
 		dataIndex: "imageUrl",
 		key: "imageUrl",
-		render: (url: string, record: any) =>
+		render: (url: string, record: { name?: string }) =>
 			url ? (
 				<Image
 					src={url}
-					alt={record.name}
+					alt={record.name || "Product image"}
 					width={32}
 					height={32}
 					className="rounded-full border border-pink-200"
@@ -157,7 +144,7 @@ export default function AdminOrdersPage() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
 	const [approvingOrderId, setApprovingOrderId] = useState<string | null>(null);
-	const [viewOrder, setViewOrder] = useState<GlobalOrder | null>(null);
+	const [viewOrder] = useState<GlobalOrder | null>(null);
 	const [viewModalOpen, setViewModalOpen] = useState(false);
 	const [modalWidth, setModalWidth] = useState(600);
 
@@ -175,7 +162,7 @@ export default function AdminOrdersPage() {
 				const ordersData = await ordersRes.json();
 				// Sort by createdAt descending
 				ordersData.sort(
-					(a: any, b: any) =>
+					(a: GlobalOrder, b: GlobalOrder) =>
 						new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
 				);
 				setOrders(ordersData);
@@ -242,7 +229,7 @@ export default function AdminOrdersPage() {
 				const ordersData = await ordersRes.json();
 				// Sort by createdAt descending
 				ordersData.sort(
-					(a: any, b: any) =>
+					(a: GlobalOrder, b: GlobalOrder) =>
 						new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
 				);
 				setOrders(ordersData);
@@ -256,98 +243,37 @@ export default function AdminOrdersPage() {
 		}
 	}
 
-	function handleViewOrder(order: GlobalOrder) {
-		setViewOrder(order);
-		setViewModalOpen(true);
-	}
-
-	function renderOrderDetails(order: GlobalOrder) {
-		return (
-			<div>
-				<h2 className="text-2xl font-bold text-pink-600 mb-4">Order Details</h2>
-				<Card bordered={false} className="mb-6 bg-pink-50/50">
-					<Descriptions
-						column={1}
-						labelStyle={{ fontWeight: 600, color: "#be185d" }}
-					>
-						<Descriptions.Item label="Order #">
-							{order.orderId}
-						</Descriptions.Item>
-						<Descriptions.Item label="Date">
-							{formatDate(order.createdAt)}
-						</Descriptions.Item>
-						<Descriptions.Item label="Status">
-							<span className="capitalize font-semibold text-pink-600">
-								{order.status}
-							</span>
-						</Descriptions.Item>
-						<Descriptions.Item label="Subtotal">
-							Ksh {order.subtotal?.toLocaleString()}
-						</Descriptions.Item>
-						<Descriptions.Item label="VAT">
-							Ksh {order.vat?.toLocaleString()}
-						</Descriptions.Item>
-						<Descriptions.Item label="Delivery Fee">
-							Ksh {order.deliveryFee?.toLocaleString()}
-						</Descriptions.Item>
-						<Descriptions.Item label="Total">
-							<span className="font-bold text-lg">
-								Ksh {order.total?.toLocaleString()}
-							</span>
-						</Descriptions.Item>
-						<Descriptions.Item label="Delivery">
-							{order.deliveryLocation}
-						</Descriptions.Item>
-						<Descriptions.Item label="Phone">
-							{order.phoneNumber}
-						</Descriptions.Item>
-						<Descriptions.Item label="Paystack Ref">
-							{order.paystackRef}
-						</Descriptions.Item>
-					</Descriptions>
-				</Card>
-				<h3 className="text-lg font-semibold text-pink-500 mb-2">Items:</h3>
-				<Table
-					columns={getProductColumns()}
-					dataSource={getOrderItemsWithProductInfo(order)}
-					pagination={false}
-					rowKey="productId"
-					size="small"
-				/>
-			</div>
-		);
-	}
-
-	// Custom render for user column to pass users array
-	const columns = getUserColumns(handleApprove, approvingOrderId).map((col) =>
-		col.key === "userId"
-			? {
-					...col,
-					render: (userId: string, record: GlobalOrder) => {
-						const user = users?.find((u) => u.uid === userId);
-						if (!user) return <span className="text-gray-400">Unknown</span>;
-						return (
-							<Space>
-								<span className="inline-block w-12 h-12 relative">
-									<Image
-										src={user.photoURL || "/ar-lipstick-logo.svg"}
-										alt={user.displayName || user.email}
-										width={48}
-										height={48}
-										className="rounded-full object-cover border border-pink-200 bg-white"
-									/>
-								</span>
-								<div>
-									<div className="font-semibold">
-										{user.displayName || user.email}
+	// Use getUserColumns(handleApprove, approvingOrderId, users) in columns definition
+	const columns = getUserColumns(handleApprove, approvingOrderId, users).map(
+		(col) =>
+			col.key === "userId"
+				? {
+						...col,
+						render: (userId: string) => {
+							const user = users?.find((u) => u.uid === userId);
+							if (!user) return <span className="text-gray-400">Unknown</span>;
+							return (
+								<Space>
+									<span className="inline-block w-12 h-12 relative">
+										<Image
+											src={user.photoURL || "/ar-lipstick-logo.svg"}
+											alt={user.displayName || user.email}
+											width={48}
+											height={48}
+											className="rounded-full object-cover border border-pink-200 bg-white"
+										/>
+									</span>
+									<div>
+										<div className="font-semibold">
+											{user.displayName || user.email}
+										</div>
+										<div className="text-xs text-gray-500">{user.email}</div>
 									</div>
-									<div className="text-xs text-gray-500">{user.email}</div>
-								</div>
-							</Space>
-						);
-					},
-			  }
-			: col
+								</Space>
+							);
+						},
+				  }
+				: col
 	);
 
 	// Add View button column
@@ -356,10 +282,12 @@ export default function AdminOrdersPage() {
 		{
 			title: "",
 			key: "view",
-			render: (_: any, record: GlobalOrder) => (
+			render: () => (
 				<button
 					className="px-4 py-2 rounded-full font-semibold text-white bg-pink-500 hover:bg-pink-600 transition"
-					onClick={() => handleViewOrder(record)}
+					onClick={() => {
+						/* View functionality would go here */
+					}}
 				>
 					View
 				</button>

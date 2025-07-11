@@ -104,7 +104,6 @@ export default function DashboardLayout({
 		<div className="min-h-screen flex bg-gradient-to-br from-pink-100 via-rose-50 to-purple-100 overflow-x-hidden">
 			{/* Sidebar: hidden on mobile, toggled with sidebarOpen */}
 			<Sidebar
-				user={null}
 				isAdmin={isAdmin}
 				onLogout={handleLogout}
 				current={pathname}

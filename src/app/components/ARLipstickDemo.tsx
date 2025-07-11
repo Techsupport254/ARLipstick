@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { FaceLandmarker } from "@mediapipe/tasks-vision";
 import {
 	setupCamera,
@@ -7,6 +7,7 @@ import {
 	detectLandmarks,
 	renderLipstick,
 } from "../../ar/arUtils";
+import Image from "next/image";
 
 export type LipstickProduct = {
 	id: number;
@@ -142,24 +143,34 @@ export default function ARLipstickTryOn({
 	const DETECT_INTERVAL = 40;
 	const SMOOTHING = 0.85;
 
-	let animationId: number;
-	function renderStep() {
-		renderLipstick(
-			canvasRef,
-			prevLandmarks.current,
-			targetLandmarks.current,
-			lipColor,
-			SMOOTHING,
-			false // DEBUG MODE OFF
-		);
-		animationId = requestAnimationFrame(renderStep);
-	}
+	// Fix animationId by using useRef and fix useEffect dependencies
+	const animationIdRef = useRef<number | null>(null);
+
+	// Wrap renderStep in useCallback and fix useEffect dependencies
+	const renderStep = useCallback(() => {
+		if (
+			videoRef.current &&
+			videoRef.current.readyState === 4 &&
+			canvasRef.current &&
+			targetLandmarks.current
+		) {
+			renderLipstick(
+				canvasRef,
+				prevLandmarks.current,
+				targetLandmarks.current,
+				lipColor,
+				SMOOTHING
+			);
+		}
+		animationIdRef.current = requestAnimationFrame(renderStep);
+	}, [lipColor]);
 
 	useEffect(() => {
 		if (!started) return;
 		let faceLandmarker: FaceLandmarker | null = null,
 			detectTimer: ReturnType<typeof setTimeout>;
 		let running = true;
+		const video = videoRef.current; // Capture ref value for cleanup
 
 		async function loadModelAndDetect() {
 			try {
@@ -232,15 +243,15 @@ export default function ARLipstickTryOn({
 		});
 		return () => {
 			running = false;
-			if (animationId) cancelAnimationFrame(animationId);
+			if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
 			if (detectTimer) clearTimeout(detectTimer);
-			if (videoRef.current && videoRef.current.srcObject) {
-				(videoRef.current.srcObject as MediaStream)
+			if (video && video.srcObject) {
+				(video.srcObject as MediaStream)
 					.getTracks()
 					.forEach((track) => track.stop());
 			}
 		};
-	}, [lipColor, started]);
+	}, [started, renderStep]);
 
 	// Replace demo-specific UI (headlines, marketing text, etc.) with only AR preview and controls if showControls is true
 	if (!started) {
@@ -330,7 +341,9 @@ export default function ARLipstickTryOn({
 									const hsl = hexToHSL(product.color);
 									setHue(hsl.h);
 									setLipColor(product.color);
-									onColorChange && onColorChange(product.color);
+									if (onColorChange) {
+										onColorChange(product.color);
+									}
 								}}
 								className={`flex flex-col items-center p-3 rounded-xl border-2 transition shadow-md hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-pink-400 ${
 									lipColor === product.color
@@ -344,9 +357,11 @@ export default function ARLipstickTryOn({
 											: undefined,
 								}}
 							>
-								<img
+								<Image
 									src={product.image}
 									alt={product.name}
+									width={48}
+									height={48}
 									className="w-12 h-12 mb-2 rounded-full border border-pink-200 object-cover"
 								/>
 								<span className="text-sm font-semibold text-gray-700 mb-1">
@@ -385,7 +400,9 @@ export default function ARLipstickTryOn({
 									const hsl = hexToHSL(baseColor);
 									const newColor = hslToHex(newHue, hsl.s, hsl.l);
 									setLipColor(newColor);
-									onColorChange && onColorChange(newColor);
+									if (onColorChange) {
+										onColorChange(newColor);
+									}
 								}}
 								className="w-48 accent-pink-500 bg-gradient-to-r from-red-400 via-pink-400 to-yellow-300 rounded-full h-2 appearance-none"
 								style={{
@@ -418,7 +435,9 @@ export default function ARLipstickTryOn({
 											onClick={() => {
 												setHue(hueVal);
 												setLipColor(swatch);
-												onColorChange && onColorChange(swatch);
+												if (onColorChange) {
+													onColorChange(swatch);
+												}
 											}}
 											aria-label={`Set hue ${hueVal}`}
 										>

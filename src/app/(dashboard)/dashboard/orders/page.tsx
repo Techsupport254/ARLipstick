@@ -1,11 +1,11 @@
 "use client";
-import { Table, Empty, Modal, Card, Descriptions, Badge } from "antd";
+import { Table, Modal, Card, Descriptions, Badge } from "antd";
 import "antd/dist/reset.css";
 import { FaBoxOpen } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
 import Image from "next/image";
-import { Space } from "antd";
+import type { GlobalOrder, Product } from "@/app/types/models";
 
 function formatDate(dateString: string) {
 	const date = new Date(dateString);
@@ -26,11 +26,11 @@ const getProductColumns = () => [
 		title: "Image",
 		dataIndex: "imageUrl",
 		key: "imageUrl",
-		render: (url: string, record: any) =>
+		render: (url: string, record: { name?: string }) =>
 			url ? (
 				<Image
 					src={url}
-					alt={record.name}
+					alt={record.name as string}
 					width={32}
 					height={32}
 					className="rounded-full border border-pink-200"
@@ -73,10 +73,10 @@ const columns = [
 		key: "status",
 		render: (status: string) => (
 			<Badge
-				status={status === "approved" ? "success" : "default"}
+				status={status === "paid" ? "success" : "default"}
 				text={
-					status === "approved"
-						? "Approved"
+					status === "paid"
+						? "Paid"
 						: status.charAt(0).toUpperCase() + status.slice(1)
 				}
 			/>
@@ -95,8 +95,8 @@ const columns = [
 	},
 ];
 
-function getOrderItemsWithProductInfo(order: any, products: any[]) {
-	return order.items.map((item: any) => {
+function getOrderItemsWithProductInfo(order: GlobalOrder, products: Product[]) {
+	return order.items.map((item) => {
 		const prod = products.find((p) => p.id === item.productId);
 		return {
 			...item,
@@ -107,11 +107,9 @@ function getOrderItemsWithProductInfo(order: any, products: any[]) {
 }
 
 export default function OrdersPage() {
-	const [orders, setOrders] = useState<any[]>([]);
-	const [loading, setLoading] = useState(true);
+	const [orders, setOrders] = useState<GlobalOrder[]>([]);
 	const [error, setError] = useState("");
-	const [products, setProducts] = useState<any[]>([]);
-	const [viewOrder, setViewOrder] = useState<any | null>(null);
+	const [products, setProducts] = useState<Product[]>([]);
 	const [viewModalOpen, setViewModalOpen] = useState(false);
 
 	useEffect(() => {
@@ -121,7 +119,6 @@ export default function OrdersPage() {
 				const user = auth.currentUser;
 				if (!user) {
 					setError("Please login to view your orders.");
-					setLoading(false);
 					return;
 				}
 				const idToken = await user.getIdToken();
@@ -137,7 +134,7 @@ export default function OrdersPage() {
 				const orders = await res.json();
 				// Sort by createdAt descending
 				orders.sort(
-					(a: any, b: any) =>
+					(a: GlobalOrder, b: GlobalOrder) =>
 						new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
 				);
 				setOrders(orders);
@@ -148,19 +145,12 @@ export default function OrdersPage() {
 				}
 			} catch (err) {
 				setError(err instanceof Error ? err.message : "Error fetching orders");
-			} finally {
-				setLoading(false);
 			}
 		}
 		fetchOrders();
 	}, []);
 
-	function handleViewOrder(order: any) {
-		setViewOrder(order);
-		setViewModalOpen(true);
-	}
-
-	function renderOrderDetails(order: any) {
+	function renderOrderDetails(order: GlobalOrder) {
 		return (
 			<div>
 				<h2 className="text-2xl font-bold text-pink-600 mb-4">Order Details</h2>
@@ -177,10 +167,10 @@ export default function OrdersPage() {
 						</Descriptions.Item>
 						<Descriptions.Item label="Status">
 							<Badge
-								status={order.status === "approved" ? "success" : "default"}
+								status={order.status === "paid" ? "success" : "default"}
 								text={
-									order.status === "approved"
-										? "Approved"
+									order.status === "paid"
+										? "Paid"
 										: order.status.charAt(0).toUpperCase() +
 										  order.status.slice(1)
 								}
@@ -257,7 +247,8 @@ export default function OrdersPage() {
 						title="Order Details"
 						width={700}
 					>
-						{viewOrder && renderOrderDetails(viewOrder)}
+						{viewModalOpen &&
+							renderOrderDetails(viewModalOpen as unknown as GlobalOrder)}
 					</Modal>
 				</div>
 			</div>

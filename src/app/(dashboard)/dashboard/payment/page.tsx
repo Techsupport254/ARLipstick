@@ -120,10 +120,10 @@ export default function PaymentPage() {
 						data.error || data.message || "Failed to fetch payments"
 					);
 				}
-				let payments = await res.json();
+				const payments: PaymentItem[] = await res.json();
 				// Sort by createdAt descending
 				payments.sort(
-					(a: any, b: any) =>
+					(a: PaymentItem, b: PaymentItem) =>
 						new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
 				);
 				setData(payments);
