@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
 				hostname: "joannakcosmetics.com",
 			},
 		],
+		unoptimized: true,
 	},
 	webpack: (config) => {
 		return config;
