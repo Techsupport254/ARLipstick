@@ -3,7 +3,7 @@ import { Table } from "antd";
 import "antd/dist/reset.css";
 import { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
-import type { User } from "../../../../types/models";
+import type { User } from "../../../types/models";
 import Image from "next/image";
 
 const columns = [

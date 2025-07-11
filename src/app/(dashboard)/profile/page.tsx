@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { app } from "../../../firebaseConfig";
+import { app } from "../../firebaseConfig";
 import Image from "next/image";
 import {
 	FaEnvelope,

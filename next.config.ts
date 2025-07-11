@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-	experimental: {
-		// turbo: false, // Removed as per Next.js 15+ requirements
-	},
 	serverExternalPackages: ["@tensorflow/tfjs", "onnxruntime-web"],
 	images: {
 		remotePatterns: [

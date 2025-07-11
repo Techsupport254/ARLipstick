@@ -2,7 +2,7 @@
 import { Table, Empty, Space, message, Modal, Card, Descriptions } from "antd";
 import "antd/dist/reset.css";
 import { useEffect, useState } from "react";
-import type { GlobalOrder, User, Product } from "../../../../types/models";
+import type { GlobalOrder, User, Product } from "../../../types/models";
 import { getAuth } from "firebase/auth";
 import Image from "next/image";
 
