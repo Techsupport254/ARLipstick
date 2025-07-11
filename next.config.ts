@@ -5,11 +5,19 @@ const nextConfig: NextConfig = {
 		// turbo: false, // Removed as per Next.js 15+ requirements
 	},
 	images: {
-		domains: [
-			"res.cloudinary.com",
-			"lh3.googleusercontent.com",
-			"joannakcosmetics.com",
-			// add other domains as needed
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "res.cloudinary.com",
+			},
+			{
+				protocol: "https",
+				hostname: "lh3.googleusercontent.com",
+			},
+			{
+				protocol: "https",
+				hostname: "joannakcosmetics.com",
+			},
 		],
 	},
 	webpack: (config) => {
