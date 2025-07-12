@@ -395,93 +395,95 @@ export default function DashboardClient() {
 							Recent Orders
 						</h2>
 						{recentOrders.length > 0 ? (
-							<Table
-								columns={[
-									{
-										title: (
-											<span className="text-pink-700 font-bold">Order #</span>
-										),
-										dataIndex: "orderId",
-										key: "orderId",
-										render: (v: string | number | undefined) => (
-											<span className="font-semibold text-black">
-												{v ? v : "-"}
-											</span>
-										),
-									},
-									{
-										title: (
-											<span className="text-pink-700 font-bold">Total</span>
-										),
-										dataIndex: "total",
-										key: "total",
-										render: (v: string | number | undefined) => (
-											<span className="font-bold text-black">
-												{typeof v === "number" ? formatKES(v) : "-"}
-											</span>
-										),
-									},
-									{
-										title: (
-											<span className="text-pink-700 font-bold">Status</span>
-										),
-										dataIndex: "status",
-										key: "status",
-										render: (v: string | undefined) => (
-											<span
-												className={`px-2 py-1 rounded-full text-xs font-bold ${
-													v === "completed"
-														? "bg-green-100 text-green-700"
-														: v === "pending"
-														? "bg-yellow-100 text-yellow-700"
-														: v === "approved"
-														? "bg-blue-100 text-blue-700"
-														: v === "paid"
-														? "bg-pink-100 text-pink-700"
-														: v === "cancelled"
-														? "bg-red-100 text-red-700"
-														: "bg-gray-100 text-gray-700"
-												}`}
-											>
-												{v || "Unknown"}
-											</span>
-										),
-									},
-									{
-										title: (
-											<span className="text-pink-700 font-bold">Date</span>
-										),
-										dataIndex: "createdAt",
-										key: "createdAt",
-										render: (v: string | undefined) => {
-											if (!v) return <span className="text-gray-600">-</span>;
-											const date = new Date(v);
-											const day = date.getDate();
-											const month = date.toLocaleString("en-US", {
-												month: "long",
-											});
-											const year = date.getFullYear();
-											// Get ordinal suffix
-											const j = day % 10,
-												k = day % 100;
-											let suffix = "th";
-											if (j === 1 && k !== 11) suffix = "st";
-											else if (j === 2 && k !== 12) suffix = "nd";
-											else if (j === 3 && k !== 13) suffix = "rd";
-											return (
-												<span className="text-gray-600">
-													{day}
-													{suffix} {month}, {year}
+							<div className="w-full overflow-x-auto">
+								<Table
+									columns={[
+										{
+											title: (
+												<span className="text-pink-700 font-bold">Order #</span>
+											),
+											dataIndex: "orderId",
+											key: "orderId",
+											render: (v: string | number | undefined) => (
+												<span className="font-semibold text-black">
+													{v ? v : "-"}
 												</span>
-											);
+											),
 										},
-									},
-								]}
-								dataSource={recentOrders}
-								pagination={false}
-								rowKey="id"
-								className="custom-table"
-							/>
+										{
+											title: (
+												<span className="text-pink-700 font-bold">Total</span>
+											),
+											dataIndex: "total",
+											key: "total",
+											render: (v: string | number | undefined) => (
+												<span className="font-bold text-black">
+													{typeof v === "number" ? formatKES(v) : "-"}
+												</span>
+											),
+										},
+										{
+											title: (
+												<span className="text-pink-700 font-bold">Status</span>
+											),
+											dataIndex: "status",
+											key: "status",
+											render: (v: string | undefined) => (
+												<span
+													className={`px-2 py-1 rounded-full text-xs font-bold ${
+														v === "completed"
+															? "bg-green-100 text-green-700"
+															: v === "pending"
+															? "bg-yellow-100 text-yellow-700"
+															: v === "approved"
+															? "bg-blue-100 text-blue-700"
+															: v === "paid"
+															? "bg-pink-100 text-pink-700"
+															: v === "cancelled"
+															? "bg-red-100 text-red-700"
+															: "bg-gray-100 text-gray-700"
+													}`}
+												>
+													{v || "Unknown"}
+												</span>
+											),
+										},
+										{
+											title: (
+												<span className="text-pink-700 font-bold">Date</span>
+											),
+											dataIndex: "createdAt",
+											key: "createdAt",
+											render: (v: string | undefined) => {
+												if (!v) return <span className="text-gray-600">-</span>;
+												const date = new Date(v);
+												const day = date.getDate();
+												const month = date.toLocaleString("en-US", {
+													month: "long",
+												});
+												const year = date.getFullYear();
+												// Get ordinal suffix
+												const j = day % 10,
+													k = day % 100;
+												let suffix = "th";
+												if (j === 1 && k !== 11) suffix = "st";
+												else if (j === 2 && k !== 12) suffix = "nd";
+												else if (j === 3 && k !== 13) suffix = "rd";
+												return (
+													<span className="text-gray-600">
+														{day}
+														{suffix} {month}, {year}
+													</span>
+												);
+											},
+										},
+									]}
+									dataSource={recentOrders}
+									pagination={false}
+									rowKey="id"
+									className="custom-table min-w-[600px]"
+								/>
+							</div>
 						) : (
 							<div className="text-center py-8 text-gray-500">
 								<p className="text-lg">No recent orders.</p>
@@ -498,96 +500,98 @@ export default function DashboardClient() {
 							Recent Payments
 						</h2>
 						{recentPayments.length > 0 ? (
-							<Table
-								columns={[
-									{
-										title: (
-											<span className="text-pink-700 font-bold">
-												Payment ID
-											</span>
-										),
-										dataIndex: "paymentId",
-										key: "paymentId",
-										render: (v: string | number | undefined) => (
-											<span className="font-semibold text-black">
-												{v ? v : "-"}
-											</span>
-										),
-									},
-									{
-										title: (
-											<span className="text-pink-700 font-bold">Amount</span>
-										),
-										dataIndex: "amount",
-										key: "amount",
-										render: (v: string | number | undefined) => (
-											<span className="font-bold text-pink-800">
-												{typeof v === "number" ? formatKES(v) : "-"}
-											</span>
-										),
-									},
-									{
-										title: (
-											<span className="text-pink-700 font-bold">Status</span>
-										),
-										dataIndex: "status",
-										key: "status",
-										render: (v: string | undefined) => {
-											let colorClass = "bg-gray-100 text-gray-700";
-											if (v === "completed" || v === "success")
-												colorClass = "bg-green-100 text-green-700";
-											else if (v === "pending")
-												colorClass = "bg-yellow-100 text-yellow-700";
-											else if (
-												v === "failed" ||
-												v === "cancelled" ||
-												v === "canceled"
-											)
-												colorClass = "bg-red-100 text-red-700";
-											return (
-												<span
-													className={`px-3 py-0.5 rounded-full text-xs font-bold capitalize ${colorClass}`}
-												>
-													{v ? v.charAt(0).toUpperCase() + v.slice(1) : "-"}
+							<div className="w-full overflow-x-auto">
+								<Table
+									columns={[
+										{
+											title: (
+												<span className="text-pink-700 font-bold">
+													Payment ID
 												</span>
-											);
-										},
-									},
-									{
-										title: (
-											<span className="text-pink-700 font-bold">Date</span>
-										),
-										dataIndex: "createdAt",
-										key: "createdAt",
-										render: (v: string | undefined) => {
-											if (!v) return <span className="text-gray-600">-</span>;
-											const date = new Date(v);
-											const day = date.getDate();
-											const month = date.toLocaleString("en-US", {
-												month: "long",
-											});
-											const year = date.getFullYear();
-											// Get ordinal suffix
-											const j = day % 10,
-												k = day % 100;
-											let suffix = "th";
-											if (j === 1 && k !== 11) suffix = "st";
-											else if (j === 2 && k !== 12) suffix = "nd";
-											else if (j === 3 && k !== 13) suffix = "rd";
-											return (
-												<span className="text-gray-600">
-													{day}
-													{suffix} {month}, {year}
+											),
+											dataIndex: "paymentId",
+											key: "paymentId",
+											render: (v: string | number | undefined) => (
+												<span className="font-semibold text-black">
+													{v ? v : "-"}
 												</span>
-											);
+											),
 										},
-									},
-								]}
-								dataSource={recentPayments}
-								pagination={false}
-								rowKey="id"
-								className="custom-table"
-							/>
+										{
+											title: (
+												<span className="text-pink-700 font-bold">Amount</span>
+											),
+											dataIndex: "amount",
+											key: "amount",
+											render: (v: string | number | undefined) => (
+												<span className="font-bold text-pink-800">
+													{typeof v === "number" ? formatKES(v) : "-"}
+												</span>
+											),
+										},
+										{
+											title: (
+												<span className="text-pink-700 font-bold">Status</span>
+											),
+											dataIndex: "status",
+											key: "status",
+											render: (v: string | undefined) => {
+												let colorClass = "bg-gray-100 text-gray-700";
+												if (v === "completed" || v === "success")
+													colorClass = "bg-green-100 text-green-700";
+												else if (v === "pending")
+													colorClass = "bg-yellow-100 text-yellow-700";
+												else if (
+													v === "failed" ||
+													v === "cancelled" ||
+													v === "canceled"
+												)
+													colorClass = "bg-red-100 text-red-700";
+												return (
+													<span
+														className={`px-3 py-0.5 rounded-full text-xs font-bold capitalize ${colorClass}`}
+													>
+														{v ? v.charAt(0).toUpperCase() + v.slice(1) : "-"}
+													</span>
+												);
+											},
+										},
+										{
+											title: (
+												<span className="text-pink-700 font-bold">Date</span>
+											),
+											dataIndex: "createdAt",
+											key: "createdAt",
+											render: (v: string | undefined) => {
+												if (!v) return <span className="text-gray-600">-</span>;
+												const date = new Date(v);
+												const day = date.getDate();
+												const month = date.toLocaleString("en-US", {
+													month: "long",
+												});
+												const year = date.getFullYear();
+												// Get ordinal suffix
+												const j = day % 10,
+													k = day % 100;
+												let suffix = "th";
+												if (j === 1 && k !== 11) suffix = "st";
+												else if (j === 2 && k !== 12) suffix = "nd";
+												else if (j === 3 && k !== 13) suffix = "rd";
+												return (
+													<span className="text-gray-600">
+														{day}
+														{suffix} {month}, {year}
+													</span>
+												);
+											},
+										},
+									]}
+									dataSource={recentPayments}
+									pagination={false}
+									rowKey="id"
+									className="custom-table min-w-[600px]"
+								/>
+							</div>
 						) : (
 							<div className="text-center py-8 text-gray-500">
 								<p className="text-lg">No recent payments.</p>
