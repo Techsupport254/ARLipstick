@@ -139,26 +139,28 @@ export default function AdminProductsPage() {
 					) : error ? (
 						<div className="text-red-500 text-center py-6 sm:py-8">{error}</div>
 					) : (
-						<Table
-							columns={columns}
-							dataSource={products}
-							pagination={false}
-							rowKey="id"
-							locale={{
-								emptyText: (
-									<Empty
-										image={Empty.PRESENTED_IMAGE_SIMPLE}
-										description={
-											<span className="text-gray-500 text-base sm:text-lg">
-												No products found.
-											</span>
-										}
-									/>
-								),
-							}}
-							className="rounded-xl overflow-hidden"
-							scroll={{ x: true }}
-						/>
+						<div className="w-full overflow-x-auto">
+							<Table
+								columns={columns}
+								dataSource={products}
+								pagination={false}
+								rowKey="id"
+								locale={{
+									emptyText: (
+										<Empty
+											image={Empty.PRESENTED_IMAGE_SIMPLE}
+											description={
+												<span className="text-gray-500 text-base sm:text-lg">
+													No products found.
+												</span>
+											}
+										/>
+									),
+								}}
+								className="rounded-xl overflow-hidden min-w-[800px]"
+								scroll={{ x: true }}
+							/>
+						</div>
 					)}
 				</div>
 			</div>

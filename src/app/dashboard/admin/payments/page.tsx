@@ -218,7 +218,8 @@ export default function AdminPaymentsPage() {
 								dataSource={data}
 								pagination={false}
 								rowKey="paymentId"
-								className="rounded-xl overflow-hidden min-w-[700px]"
+								className="rounded-xl overflow-hidden min-w-[1000px]"
+								scroll={{ x: true }}
 							/>
 						</div>
 					)}

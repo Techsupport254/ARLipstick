@@ -236,7 +236,8 @@ export default function OrdersPage() {
 								dataSource={orders}
 								pagination={false}
 								rowKey="orderId"
-								className="rounded-xl overflow-hidden min-w-[600px]"
+								className="rounded-xl overflow-hidden min-w-[700px]"
+								scroll={{ x: true }}
 							/>
 						</div>
 					)}

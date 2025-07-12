@@ -174,7 +174,8 @@ export default function PaymentPage() {
 									),
 								}}
 								rowKey="paymentId"
-								className="rounded-xl overflow-hidden min-w-[600px]"
+								className="rounded-xl overflow-hidden min-w-[900px]"
+								scroll={{ x: true }}
 							/>
 						</div>
 					)}

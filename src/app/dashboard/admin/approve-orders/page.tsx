@@ -29,12 +29,16 @@ export default function ApproveOrdersPage() {
 					Approve Orders
 				</h1>
 				<div className="w-full bg-white/90 rounded-3xl shadow-2xl border border-pink-100 p-6">
-					<Table
-						columns={columns}
-						dataSource={data}
-						pagination={false}
-						rowKey="orderId"
-					/>
+					<div className="w-full overflow-x-auto">
+						<Table
+							columns={columns}
+							dataSource={data}
+							pagination={false}
+							rowKey="orderId"
+							className="rounded-xl overflow-hidden min-w-[600px]"
+							scroll={{ x: true }}
+						/>
+					</div>
 				</div>
 			</div>
 		</div>

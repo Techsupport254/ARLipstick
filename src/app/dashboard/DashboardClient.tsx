@@ -482,6 +482,7 @@ export default function DashboardClient() {
 									pagination={false}
 									rowKey="id"
 									className="custom-table min-w-[600px]"
+									scroll={{ x: true }}
 								/>
 							</div>
 						) : (
@@ -590,6 +591,7 @@ export default function DashboardClient() {
 									pagination={false}
 									rowKey="id"
 									className="custom-table min-w-[600px]"
+									scroll={{ x: true }}
 								/>
 							</div>
 						) : (
@@ -914,176 +916,189 @@ export default function DashboardClient() {
 									<h2 className="text-xl font-bold text-pink-800 mb-4 flex items-center gap-2">
 										<FaClock className="text-pink-600" /> Recent Orders
 									</h2>
-									<Table
-										columns={[
-											{
-												title: (
-													<span className="text-pink-700 font-bold">
-														Order #
-													</span>
-												),
-												dataIndex: "orderId",
-												key: "orderId",
-												render: (v) => (
-													<span className="font-semibold text-black">{v}</span>
-												),
-											},
-											{
-												title: (
-													<span className="text-pink-700 font-bold">
-														Customer
-													</span>
-												),
-												dataIndex: "customerName",
-												key: "customerName",
-												render: (v: any, record: any) => (
-													<span className="flex items-center gap-3">
-														<span className="inline-block w-10 h-10 relative">
-															<Image
-																src={
-																	record.customerPhotoURL ||
-																	"/ar-lipstick-logo.svg"
-																}
-																alt={record.customerName || "Customer"}
-																width={40}
-																height={40}
-																className="rounded-full object-cover border border-pink-200 bg-white"
-															/>
+									<div className="w-full overflow-x-auto">
+										<Table
+											columns={[
+												{
+													title: (
+														<span className="text-pink-700 font-bold">
+															Order #
 														</span>
-														<div>
-															<div className="font-semibold text-gray-800">
-																{record.customerName || "Unknown"}
-															</div>
-															<div className="text-xs text-gray-500">
-																{record.customerEmail || "-"}
-															</div>
-														</div>
-													</span>
-												),
-											},
-											{
-												title: (
-													<span className="text-pink-700 font-bold">Total</span>
-												),
-												dataIndex: "total",
-												key: "total",
-												render: (v) => (
-													<span className="font-bold text-pink-800">
-														{formatKES(v)}
-													</span>
-												),
-											},
-											{
-												title: (
-													<span className="text-pink-700 font-bold">
-														Status
-													</span>
-												),
-												dataIndex: "status",
-												key: "status",
-												render: (v) => (
-													<span
-														className={`px-2 py-1 rounded-full text-xs font-bold ${
-															v === "completed"
-																? "bg-green-100 text-green-700"
-																: v === "pending"
-																? "bg-yellow-100 text-yellow-700"
-																: v === "approved"
-																? "bg-blue-100 text-blue-700"
-																: v === "paid"
-																? "bg-pink-100 text-pink-700"
-																: v === "cancelled"
-																? "bg-red-100 text-red-700"
-																: "bg-gray-100 text-gray-700"
-														}`}
-													>
-														{v}
-													</span>
-												),
-											},
-											{
-												title: (
-													<span className="text-pink-700 font-bold">Date</span>
-												),
-												dataIndex: "createdAt",
-												key: "createdAt",
-												render: (v) => {
-													if (!v)
-														return <span className="text-gray-600">-</span>;
-													const date = new Date(v);
-													const day = date.getDate();
-													const month = date.toLocaleString("en-US", {
-														month: "long",
-													});
-													const year = date.getFullYear();
-													// Get ordinal suffix
-													const j = day % 10,
-														k = day % 100;
-													let suffix = "th";
-													if (j === 1 && k !== 11) suffix = "st";
-													else if (j === 2 && k !== 12) suffix = "nd";
-													else if (j === 3 && k !== 13) suffix = "rd";
-													return (
-														<span className="text-gray-600">
-															{day}
-															{suffix} {month}, {year}
+													),
+													dataIndex: "orderId",
+													key: "orderId",
+													render: (v) => (
+														<span className="font-semibold text-black">
+															{v}
 														</span>
-													);
+													),
 												},
-											},
-											{
-												title: (
-													<span className="text-pink-700 font-bold">
-														Payment Status
-													</span>
-												),
-												dataIndex: "paymentStatus",
-												key: "paymentStatus",
-												render: () => (
-													<span className="px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
-														completed
-													</span>
-												),
-											},
-										]}
-										dataSource={(
-											comprehensiveStats.recentActivity as any
-										)?.recentOrders?.map((order: any) => {
-											// Find the user for this order
-											const user = (
+												{
+													title: (
+														<span className="text-pink-700 font-bold">
+															Customer
+														</span>
+													),
+													dataIndex: "customerName",
+													key: "customerName",
+													render: (v: any, record: any) => (
+														<span className="flex items-center gap-3">
+															<span className="inline-block w-10 h-10 relative">
+																<Image
+																	src={
+																		record.customerPhotoURL ||
+																		"/ar-lipstick-logo.svg"
+																	}
+																	alt={record.customerName || "Customer"}
+																	width={40}
+																	height={40}
+																	className="rounded-full object-cover border border-pink-200 bg-white"
+																/>
+															</span>
+															<div>
+																<div className="font-semibold text-gray-800">
+																	{record.customerName || "Unknown"}
+																</div>
+																<div className="text-xs text-gray-500">
+																	{record.customerEmail || "-"}
+																</div>
+															</div>
+														</span>
+													),
+												},
+												{
+													title: (
+														<span className="text-pink-700 font-bold">
+															Total
+														</span>
+													),
+													dataIndex: "total",
+													key: "total",
+													render: (v) => (
+														<span className="font-bold text-pink-800">
+															{formatKES(v)}
+														</span>
+													),
+												},
+												{
+													title: (
+														<span className="text-pink-700 font-bold">
+															Status
+														</span>
+													),
+													dataIndex: "status",
+													key: "status",
+													render: (v) => (
+														<span
+															className={`px-2 py-1 rounded-full text-xs font-bold ${
+																v === "completed"
+																	? "bg-green-100 text-green-700"
+																	: v === "pending"
+																	? "bg-yellow-100 text-yellow-700"
+																	: v === "approved"
+																	? "bg-blue-100 text-blue-700"
+																	: v === "paid"
+																	? "bg-pink-100 text-pink-700"
+																	: v === "cancelled"
+																	? "bg-red-100 text-red-700"
+																	: "bg-gray-100 text-gray-700"
+															}`}
+														>
+															{v}
+														</span>
+													),
+												},
+												{
+													title: (
+														<span className="text-pink-700 font-bold">
+															Date
+														</span>
+													),
+													dataIndex: "createdAt",
+													key: "createdAt",
+													render: (v) => {
+														if (!v)
+															return <span className="text-gray-600">-</span>;
+														const date = new Date(v);
+														const day = date.getDate();
+														const month = date.toLocaleString("en-US", {
+															month: "long",
+														});
+														const year = date.getFullYear();
+														// Get ordinal suffix
+														const j = day % 10,
+															k = day % 100;
+														let suffix = "th";
+														if (j === 1 && k !== 11) suffix = "st";
+														else if (j === 2 && k !== 12) suffix = "nd";
+														else if (j === 3 && k !== 13) suffix = "rd";
+														return (
+															<span className="text-gray-600">
+																{day}
+																{suffix} {month}, {year}
+															</span>
+														);
+													},
+												},
+												{
+													title: (
+														<span className="text-pink-700 font-bold">
+															Payment Status
+														</span>
+													),
+													dataIndex: "paymentStatus",
+													key: "paymentStatus",
+													render: () => (
+														<span className="px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
+															completed
+														</span>
+													),
+												},
+											]}
+											dataSource={(
 												comprehensiveStats.recentActivity as any
-											)?.users?.find(
-												(u: any) =>
-													u.uid === order.userId ||
-													u.id === order.userId ||
-													u.email === order.customerEmail
-											);
-											const payment = (
-												comprehensiveStats.recentActivity as any
-											)?.recentPayments?.find(
-												(p: any) =>
-													p.orderId === order.orderId ||
-													p.paymentId === order.orderId ||
-													(order.paymentId && p.paymentId === order.paymentId)
-											);
-											return {
-												key: order.id,
-												orderId: order.orderId,
-												customerName:
-													user?.displayName || order.customerName || "Unknown",
-												customerEmail:
-													user?.email || order.customerEmail || "-",
-												customerPhotoURL:
-													user?.photoURL || order.customerPhotoURL || undefined,
-												total: order.total,
-												status: order.status,
-												createdAt: order.createdAt,
-												paymentStatus: payment ? payment.status : "",
-											};
-										})}
-										pagination={false}
-										className="custom-table"
-									/>
+											)?.recentOrders?.map((order: any) => {
+												// Find the user for this order
+												const user = (
+													comprehensiveStats.recentActivity as any
+												)?.users?.find(
+													(u: any) =>
+														u.uid === order.userId ||
+														u.id === order.userId ||
+														u.email === order.customerEmail
+												);
+												const payment = (
+													comprehensiveStats.recentActivity as any
+												)?.recentPayments?.find(
+													(p: any) =>
+														p.orderId === order.orderId ||
+														p.paymentId === order.orderId ||
+														(order.paymentId && p.paymentId === order.paymentId)
+												);
+												return {
+													key: order.id,
+													orderId: order.orderId,
+													customerName:
+														user?.displayName ||
+														order.customerName ||
+														"Unknown",
+													customerEmail:
+														user?.email || order.customerEmail || "-",
+													customerPhotoURL:
+														user?.photoURL ||
+														order.customerPhotoURL ||
+														undefined,
+													total: order.total,
+													status: order.status,
+													createdAt: order.createdAt,
+													paymentStatus: payment ? payment.status : "",
+												};
+											})}
+											pagination={false}
+											className="custom-table min-w-[800px]"
+											scroll={{ x: true }}
+										/>
+									</div>
 								</div>
 							</div>
 							{/* Recent Payments and New Users - side by side */}
@@ -1093,155 +1108,172 @@ export default function DashboardClient() {
 									<h2 className="text-xl font-bold text-pink-800 mb-4 flex items-center gap-2">
 										<FaCreditCard className="text-pink-600" /> Recent Payments
 									</h2>
-									<Table
-										columns={[
-											{
-												title: (
-													<span className="text-pink-700 font-bold">
-														Payment ID
-													</span>
-												),
-												dataIndex: "paymentId",
-												key: "paymentId",
-												render: (v: any, record: any) => (
-													<div>
-														<span className="font-semibold text-black block">
-															#{v}
+									<div className="w-full overflow-x-auto">
+										<Table
+											columns={[
+												{
+													title: (
+														<span className="text-pink-700 font-bold">
+															Payment ID
 														</span>
-														<span className="text-xs text-gray-400 block mt-0.5">
-															{formatPrettyDate(record.createdAt)}
-														</span>
-													</div>
-												),
-											},
-											{
-												title: (
-													<span className="text-pink-700 font-bold">
-														Amount
-													</span>
-												),
-												dataIndex: "amount",
-												key: "amount",
-												align: "right",
-												render: (v) => (
-													<span className="font-bold text-pink-800">
-														{formatKES(v)}
-													</span>
-												),
-											},
-											{
-												title: (
-													<span className="text-pink-700 font-bold">
-														Status
-													</span>
-												),
-												dataIndex: "status",
-												key: "status",
-												render: (v) => {
-													let colorClass = "bg-gray-100 text-gray-700";
-													if (v === "completed" || v === "success")
-														colorClass = "bg-green-100 text-green-700";
-													else if (v === "pending")
-														colorClass = "bg-yellow-100 text-yellow-700";
-													else if (
-														v === "failed" ||
-														v === "cancelled" ||
-														v === "canceled"
-													)
-														colorClass = "bg-red-100 text-red-700";
-													return (
-														<span
-															className={`px-3 py-0.5 rounded-full text-xs font-bold capitalize ${colorClass}`}
-														>
-															{v.charAt(0).toUpperCase() + v.slice(1)}
-														</span>
-													);
+													),
+													dataIndex: "paymentId",
+													key: "paymentId",
+													render: (v: any, record: any) => (
+														<div>
+															<span className="font-semibold text-black block">
+																#{v}
+															</span>
+															<span className="text-xs text-gray-400 block mt-0.5">
+																{formatPrettyDate(record.createdAt)}
+															</span>
+														</div>
+													),
 												},
-											},
-										]}
-										dataSource={
-											(comprehensiveStats.recentActivity as any)?.recentPayments
-										}
-										pagination={false}
-										rowKey="id"
-										className="custom-table"
-									/>
+												{
+													title: (
+														<span className="text-pink-700 font-bold">
+															Amount
+														</span>
+													),
+													dataIndex: "amount",
+													key: "amount",
+													align: "right",
+													render: (v) => (
+														<span className="font-bold text-pink-800">
+															{formatKES(v)}
+														</span>
+													),
+												},
+												{
+													title: (
+														<span className="text-pink-700 font-bold">
+															Status
+														</span>
+													),
+													dataIndex: "status",
+													key: "status",
+													render: (v) => {
+														let colorClass = "bg-gray-100 text-gray-700";
+														if (v === "completed" || v === "success")
+															colorClass = "bg-green-100 text-green-700";
+														else if (v === "pending")
+															colorClass = "bg-yellow-100 text-yellow-700";
+														else if (
+															v === "failed" ||
+															v === "cancelled" ||
+															v === "canceled"
+														)
+															colorClass = "bg-red-100 text-red-700";
+														return (
+															<span
+																className={`px-3 py-0.5 rounded-full text-xs font-bold capitalize ${colorClass}`}
+															>
+																{v.charAt(0).toUpperCase() + v.slice(1)}
+															</span>
+														);
+													},
+												},
+											]}
+											dataSource={
+												(comprehensiveStats.recentActivity as any)
+													?.recentPayments
+											}
+											pagination={false}
+											rowKey="id"
+											className="custom-table min-w-[500px]"
+											scroll={{ x: true }}
+										/>
+									</div>
 								</div>
 								{/* New Users */}
 								<div className="bg-white rounded-2xl shadow-xl p-4">
 									<h2 className="text-xl font-bold text-pink-800 mb-4 flex items-center gap-2">
 										<FaUserPlus className="text-pink-600" /> New Users
 									</h2>
-									<Table
-										columns={[
-											{
-												title: (
-													<span className="text-pink-700 font-bold">User</span>
-												),
-												dataIndex: "displayName",
-												key: "displayName",
-												render: (v: any, record: any) => (
-													<span className="flex items-center gap-3">
-														<span className="inline-block w-10 h-10 relative">
-															<Image
-																src={record.photoURL || "/ar-lipstick-logo.svg"}
-																alt={
-																	record.displayName || record.name || "User"
-																}
-																width={40}
-																height={40}
-																className="rounded-full object-cover border border-pink-200 bg-white"
-															/>
+									<div className="w-full overflow-x-auto">
+										<Table
+											columns={[
+												{
+													title: (
+														<span className="text-pink-700 font-bold">
+															User
 														</span>
-														<div>
-															<div className="font-semibold text-gray-800">
-																{record.displayName || record.name || "Unknown"}
+													),
+													dataIndex: "displayName",
+													key: "displayName",
+													render: (v: any, record: any) => (
+														<span className="flex items-center gap-3">
+															<span className="inline-block w-10 h-10 relative">
+																<Image
+																	src={
+																		record.photoURL || "/ar-lipstick-logo.svg"
+																	}
+																	alt={
+																		record.displayName || record.name || "User"
+																	}
+																	width={40}
+																	height={40}
+																	className="rounded-full object-cover border border-pink-200 bg-white"
+																/>
+															</span>
+															<div>
+																<div className="font-semibold text-gray-800">
+																	{record.displayName ||
+																		record.name ||
+																		"Unknown"}
+																</div>
+																<div className="text-xs text-gray-500">
+																	{record.email || "-"}
+																</div>
 															</div>
-															<div className="text-xs text-gray-500">
-																{record.email || "-"}
-															</div>
-														</div>
-													</span>
-												),
-											},
-											{
-												title: (
-													<span className="text-pink-700 font-bold">Role</span>
-												),
-												dataIndex: "role",
-												key: "role",
-												render: (role: any) => (
-													<span
-														className={`px-3 py-0.5 rounded-full text-xs font-bold capitalize ${
-															role === "admin"
-																? "bg-yellow-100 text-yellow-800"
-																: "bg-pink-100 text-pink-700"
-														}`}
-													>
-														{role}
-													</span>
-												),
-											},
-											{
-												title: (
-													<span className="text-pink-700 font-bold">Date</span>
-												),
-												dataIndex: "createdAt",
-												key: "createdAt",
-												render: (v: any) => (
-													<span className="text-xs text-gray-400">
-														{formatPrettyDate(v)}
-													</span>
-												),
-											},
-										]}
-										dataSource={
-											(comprehensiveStats.recentActivity as any)?.newUsers
-										}
-										pagination={false}
-										rowKey="id"
-										className="custom-table"
-									/>
+														</span>
+													),
+												},
+												{
+													title: (
+														<span className="text-pink-700 font-bold">
+															Role
+														</span>
+													),
+													dataIndex: "role",
+													key: "role",
+													render: (role: any) => (
+														<span
+															className={`px-3 py-0.5 rounded-full text-xs font-bold capitalize ${
+																role === "admin"
+																	? "bg-yellow-100 text-yellow-800"
+																	: "bg-pink-100 text-pink-700"
+															}`}
+														>
+															{role}
+														</span>
+													),
+												},
+												{
+													title: (
+														<span className="text-pink-700 font-bold">
+															Date
+														</span>
+													),
+													dataIndex: "createdAt",
+													key: "createdAt",
+													render: (v: any) => (
+														<span className="text-xs text-gray-400">
+															{formatPrettyDate(v)}
+														</span>
+													),
+												},
+											]}
+											dataSource={
+												(comprehensiveStats.recentActivity as any)?.newUsers
+											}
+											pagination={false}
+											rowKey="id"
+											className="custom-table min-w-[500px]"
+											scroll={{ x: true }}
+										/>
+									</div>
 								</div>
 							</div>
 						</>

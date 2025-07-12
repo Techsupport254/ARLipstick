@@ -309,26 +309,28 @@ export default function AdminOrdersPage() {
 					) : error ? (
 						<div className="text-red-500 text-center py-6 sm:py-8">{error}</div>
 					) : (
-						<Table
-							columns={columnsWithView}
-							dataSource={orders}
-							pagination={false}
-							rowKey="orderId"
-							locale={{
-								emptyText: (
-									<Empty
-										image={Empty.PRESENTED_IMAGE_SIMPLE}
-										description={
-											<span className="text-gray-500 text-base sm:text-lg">
-												No orders found.
-											</span>
-										}
-									/>
-								),
-							}}
-							className="rounded-xl overflow-hidden"
-							scroll={{ x: true }}
-						/>
+						<div className="w-full overflow-x-auto">
+							<Table
+								columns={columnsWithView}
+								dataSource={orders}
+								pagination={false}
+								rowKey="orderId"
+								locale={{
+									emptyText: (
+										<Empty
+											image={Empty.PRESENTED_IMAGE_SIMPLE}
+											description={
+												<span className="text-gray-500 text-base sm:text-lg">
+													No orders found.
+												</span>
+											}
+										/>
+									),
+								}}
+								className="rounded-xl overflow-hidden min-w-[800px]"
+								scroll={{ x: true }}
+							/>
+						</div>
 					)}
 				</div>
 				{/* Order Details Modal */}
@@ -374,7 +376,7 @@ export default function AdminOrdersPage() {
 								dataSource={getOrderItemsWithProductInfo(viewOrder)}
 								pagination={false}
 								rowKey={(r) => r.productId}
-								className="rounded-xl overflow-hidden mt-2"
+								className="rounded-xl overflow-hidden mt-2 min-w-[600px]"
 								scroll={{ x: true }}
 							/>
 						</Card>

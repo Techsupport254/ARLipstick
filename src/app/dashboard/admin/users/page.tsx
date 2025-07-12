@@ -112,7 +112,8 @@ export default function AdminUsersPage() {
 								dataSource={users}
 								pagination={false}
 								rowKey="uid"
-								className="rounded-xl overflow-hidden min-w-[700px]"
+								className="rounded-xl overflow-hidden min-w-[900px]"
+								scroll={{ x: true }}
 							/>
 						</div>
 					)}
