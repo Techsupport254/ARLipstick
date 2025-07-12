@@ -1,7 +1,7 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-	serverExternalPackages: ["@tensorflow/tfjs", "onnxruntime-web"],
+const nextConfig = {
+	experimental: {
+		serverComponentsExternalPackages: ["@tensorflow/tfjs", "onnxruntime-web"],
+	},
 	images: {
 		remotePatterns: [
 			{
@@ -31,4 +31,4 @@ const nextConfig: NextConfig = {
 	},
 };
 
-export default nextConfig;
+module.exports = nextConfig;

@@ -125,9 +125,7 @@ export default function ARLipstickTryOn({
 	const videoRef = useRef<HTMLVideoElement>(
 		null
 	) as React.RefObject<HTMLVideoElement>;
-	const canvasRef = useRef<HTMLCanvasElement>(
-		null
-	) as React.RefObject<HTMLCanvasElement | null>;
+	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const [error, setError] = useState("");
 	const [lipColor, setLipColor] = useState(initialColor);
 	const [hue, setHue] = useState<number>(hexToHSL(initialColor).h);
@@ -236,7 +234,7 @@ export default function ARLipstickTryOn({
 			if (success) loadModelAndDetect();
 			else {
 				setError(
-					"Camera access is required for the AR Lipstick demo. Please allow camera access in your browser settings."
+					"Camera access is required for the LushLips demo. Please allow camera access in your browser settings."
 				);
 				setLoading(false);
 			}
@@ -281,7 +279,7 @@ export default function ARLipstickTryOn({
 						onClick={() => setStarted(true)}
 						className="px-10 py-4 bg-pink-500 text-white rounded-full shadow-lg hover:bg-pink-600 transition font-semibold text-xl mt-4 mb-2 focus:outline-none focus:ring-4 focus:ring-pink-300"
 					>
-						Start AR Lipstick
+						Start LushLips
 					</button>
 					{loading && (
 						<div className="text-gray-500 mt-2 text-sm animate-pulse text-center">

@@ -19,7 +19,7 @@ const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
 	.map((e) => e.trim())
 	.filter(Boolean);
 
-export default function DashboardPage() {
+export default function DashboardClient() {
 	const [loading, setLoading] = useState(true);
 	const router = useRouter();
 	// Add state for profile, orders, payments, cart, stats

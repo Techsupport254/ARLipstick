@@ -109,7 +109,7 @@ export default function Sidebar({
 			<div className="flex flex-col items-center mb-6 sm:mb-8">
 				<Image
 					src="/ar-lipstick-logo.svg"
-					alt="AR Lipstick Logo"
+					alt="LushLips Logo"
 					width={48}
 					height={48}
 					className="w-12 h-12 sm:w-16 sm:h-16 mb-2 object-contain"
