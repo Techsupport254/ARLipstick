@@ -1,18 +1,20 @@
 # CHAPTER 3: SYSTEM ANALYSIS AND DESIGN
 
+<div style="font-family: 'Times New Roman', serif; line-height: 1.5; text-align: justify;">
+
 ## 3.1 Introduction
 
-This chapter presents a comprehensive system analysis and design for the LushLips AR Lipstick Try-On web application. The analysis encompasses the systems development methodology, feasibility study, requirements elicitation, data analysis, system specifications, and both logical and physical design aspects. The focus is on creating a robust, user-friendly web-based augmented reality application that enables users to virtually try on lipstick products in real-time using their device's camera and advanced facial recognition technology.
+This chapter presents a comprehensive system analysis and design for the proposed LushLips AR Lipstick Try-On web application. The analysis encompasses the systems development methodology, feasibility study, requirements elicitation, data analysis, system specifications, and both logical and physical design aspects. The focus is on creating a robust, user-friendly web-based augmented reality application that will enable users to virtually try on lipstick products in real-time using their device's camera and advanced facial recognition technology.
 
-The system integrates cutting-edge AR technology with e-commerce functionality, providing a seamless shopping experience that addresses the limitations of traditional beauty product trials. The application leverages MediaPipe for real-time facial landmark detection, Firebase for backend services, and Next.js for the frontend framework, creating a scalable and maintainable solution.
+The proposed system will integrate cutting-edge AR technology with e-commerce functionality, providing a seamless shopping experience that addresses the limitations of traditional beauty product trials. The application will leverage MediaPipe for real-time facial landmark detection, Firebase for backend services, and Next.js for the frontend framework, creating a scalable and maintainable solution.
 
 ## 3.2 Systems Development Methodology
 
 ### 3.2.1 Agile Development Framework
 
-The project employs the **Agile Development Methodology** with Scrum framework, selected for its iterative approach, flexibility, and ability to accommodate evolving requirements. This methodology is particularly suitable for AR application development due to the complex nature of facial recognition, real-time rendering, and user experience requirements.
+The project will employ the **Agile Development Methodology** with Scrum framework, selected for its iterative approach, flexibility, and ability to accommodate evolving requirements. This methodology is particularly suitable for AR application development due to the complex nature of facial recognition, real-time rendering, and user experience requirements.
 
-The development process follows these key principles:
+The development process will follow these key principles:
 
 - **Iterative Development**: Two-week sprints with regular deliverables and stakeholder feedback
 - **User-Centric Design**: Continuous integration of user feedback throughout development
@@ -21,7 +23,7 @@ The development process follows these key principles:
 
 ### 3.2.2 Development Phases and Sprints
 
-The project was executed across eight development sprints, each focusing on specific deliverables:
+The project will be executed across eight development sprints, each focusing on specific deliverables:
 
 **Sprint 1-2: Core AR Foundation**
 
@@ -53,10 +55,12 @@ The project was executed across eight development sprints, each focusing on spec
 
 **Development Cost Analysis:**
 
-- **Technology Stack**: $0 (Open-source frameworks and tools)
-- **Cloud Services**: $0 (Firebase free tier, Vercel free tier)
-- **Domain Registration**: $12/year (Optional custom domain)
-- **Total Initial Investment**: $12/year
+| Cost Component               | Amount (USD) | Justification                        |
+| ---------------------------- | ------------ | ------------------------------------ |
+| Technology Stack             | $0           | Open-source frameworks and tools     |
+| Cloud Services               | $0           | Firebase free tier, Vercel free tier |
+| Domain Registration          | $12/year     | Optional custom domain               |
+| **Total Initial Investment** | **$12/year** | Minimal upfront costs                |
 
 **Return on Investment Projections:**
 
@@ -71,27 +75,15 @@ The project was executed across eight development sprints, each focusing on spec
 
 **Technology Stack Analysis:**
 
-**Frontend Technologies:**
-
-- **Next.js 14.2.4**: Proven React framework with server-side rendering capabilities
-- **React 18.2.0**: Stable component library with concurrent features
-- **TypeScript**: Type-safe development ensuring code reliability
-
-**AR and Computer Vision:**
-
-- **MediaPipe**: Google's robust facial landmark detection library
-- **WebRTC**: Real-time camera access and video processing
-- **Canvas API**: High-performance 2D rendering for AR overlays
-
-**Backend Services:**
-
-- **Firebase Authentication**: Secure OAuth 2.0 implementation
-- **Firestore Database**: NoSQL cloud database with real-time synchronization
-- **Firebase Storage**: Scalable image and asset storage
-
-**Deployment Platform:**
-
-- **Vercel**: Optimized hosting for Next.js applications with global CDN
+| Technology     | Purpose                   | Feasibility Assessment             |
+| -------------- | ------------------------- | ---------------------------------- |
+| Next.js 14.2.4 | Frontend framework        | ✅ Proven React framework with SSR |
+| React 18.2.0   | UI component library      | ✅ Stable with concurrent features |
+| TypeScript     | Type-safe development     | ✅ Ensures code reliability        |
+| MediaPipe      | Facial landmark detection | ✅ Google's robust AR library      |
+| WebRTC         | Camera access and video   | ✅ Standard web technology         |
+| Firebase       | Backend services          | ✅ Scalable cloud platform         |
+| Vercel         | Deployment platform       | ✅ Optimized for Next.js           |
 
 **Technical Requirements Assessment:**
 
@@ -125,29 +117,19 @@ The project was executed across eight development sprints, each focusing on spec
 
 **Primary Research Methods:**
 
-**Stakeholder Interviews:**
+| Research Method        | Participants                           | Duration  | Focus Areas                             |
+| ---------------------- | -------------------------------------- | --------- | --------------------------------------- |
+| Stakeholder Interviews | Beauty professionals, retailers, users | 30-45 min | Shopping pain points, AR expectations   |
+| Online Survey          | Tech-savvy consumers (18-35)           | 15-20 min | User preferences, feature priorities    |
+| Market Research        | Industry analysis                      | Ongoing   | Competitive analysis, technology trends |
+| Technical Research     | Framework evaluation                   | Ongoing   | Performance testing, security analysis  |
 
-- **Participants**: Beauty industry professionals, cosmetic retailers, and potential users
-- **Duration**: 30-45 minutes per interview
-- **Focus Areas**: Current shopping pain points, AR technology expectations, feature priorities
+**Sampling Strategy:**
 
-**Online Survey Distribution:**
-
-- **Target Demographic**: Tech-savvy consumers aged 18-35
+- **Target Population**: Tech-savvy beauty consumers aged 18-35
 - **Sample Size**: 50 respondents for initial requirements gathering
-- **Platform**: Google Forms with structured questionnaires
-
-**Market Research:**
-
-- **Competitive Analysis**: Evaluation of existing AR beauty applications
-- **Technology Assessment**: Review of AR frameworks and implementation approaches
-- **User Behavior Study**: Analysis of online beauty shopping patterns
-
-**Technical Research:**
-
-- **Framework Evaluation**: Assessment of Next.js, MediaPipe, and Firebase capabilities
-- **Performance Testing**: Benchmarking of AR rendering performance
-- **Security Analysis**: Evaluation of authentication and payment security requirements
+- **Sampling Technique**: Convenience sampling with purposive selection
+- **Data Collection Period**: 4 weeks for comprehensive analysis
 
 ### 3.4.2 Data Collection Instruments
 
@@ -170,25 +152,21 @@ The project was executed across eight development sprints, each focusing on spec
 
 **Key Findings from User Research:**
 
-**User Preferences:**
+| Finding                             | Percentage | Significance                   |
+| ----------------------------------- | ---------- | ------------------------------ |
+| Interest in virtual lipstick try-on | 85%        | High market demand             |
+| Preference for web-based solutions  | 72%        | Cross-platform accessibility   |
+| Color accuracy as critical feature  | 68%        | Quality requirement            |
+| Real-time performance requirement   | 91%        | User experience priority       |
+| Secure payment processing need      | 78%        | Trust and security requirement |
 
-- **85%** of respondents expressed strong interest in virtual lipstick try-on
-- **72%** preferred web-based solutions over mobile applications
-- **68%** identified color accuracy as the most critical feature
-- **91%** demanded real-time application without noticeable delays
-- **78%** required secure payment processing for transactions
+**Technical Requirements Analysis:**
 
-**Technical Requirements:**
-
-- **Browser Usage**: Chrome (65%), Safari (20%), Firefox (15%)
-- **Device Distribution**: Mobile (60%), Desktop (40%)
-- **Internet Connectivity**: High-speed (80%), Moderate (20%)
-
-**Feature Priorities:**
-
-- **High Priority**: Real-time AR, secure payments, mobile responsiveness
-- **Medium Priority**: Multiple finishes, product recommendations, order tracking
-- **Low Priority**: Social sharing, advanced analytics, offline functionality
+| Requirement           | Distribution                              | Implication                        |
+| --------------------- | ----------------------------------------- | ---------------------------------- |
+| Browser Usage         | Chrome (65%), Safari (20%), Firefox (15%) | Cross-browser compatibility needed |
+| Device Distribution   | Mobile (60%), Desktop (40%)               | Mobile-first design approach       |
+| Internet Connectivity | High-speed (80%), Moderate (20%)          | Performance optimization required  |
 
 ## 3.5 Data Analysis
 
@@ -196,21 +174,25 @@ The project was executed across eight development sprints, each focusing on spec
 
 **User Demographics Analysis:**
 
-- **Age Distribution**: 18-25 (45%), 26-35 (55%)
-- **Gender Distribution**: Female (78%), Male (22%)
-- **Shopping Frequency**: Weekly (35%), Monthly (45%), Occasional (20%)
+| Demographic                     | Distribution | Percentage                 |
+| ------------------------------- | ------------ | -------------------------- |
+| Age Group (18-25)               | 45%          | Primary target market      |
+| Age Group (26-35)               | 55%          | Secondary target market    |
+| Gender (Female)                 | 78%          | Main user base             |
+| Gender (Male)                   | 22%          | Growing market segment     |
+| Shopping Frequency (Weekly)     | 35%          | High engagement users      |
+| Shopping Frequency (Monthly)    | 45%          | Regular customers          |
+| Shopping Frequency (Occasional) | 20%          | Potential market expansion |
 
-**Technical Preferences Analysis:**
+**Feature Priority Analysis:**
 
-- **Platform Preference**: Web-based (72%) vs Mobile App (28%)
-- **Feature Priority Ranking**: Color Accuracy (68%), Speed (91%), Security (78%)
-- **Device Usage**: Smartphone (60%), Desktop (25%), Tablet (15%)
-
-**Market Analysis:**
-
-- **AR Technology Awareness**: High (65%), Moderate (25%), Low (10%)
-- **Virtual Try-on Experience**: Previous users (40%), First-time users (60%)
-- **Purchase Decision Factors**: Color accuracy (45%), Convenience (30%), Price (25%)
+| Feature               | Priority Score | Ranking |
+| --------------------- | -------------- | ------- |
+| Color Accuracy        | 4.2/5          | 1st     |
+| Real-time Performance | 4.1/5          | 2nd     |
+| Security              | 3.9/5          | 3rd     |
+| Mobile Responsiveness | 3.8/5          | 4th     |
+| Multiple Finishes     | 3.5/5          | 5th     |
 
 ### 3.5.2 Requirements Prioritization
 
@@ -244,61 +226,77 @@ The project was executed across eight development sprints, each focusing on spec
 
 **User Management System:**
 
-- **FR1**: Users can register and login using Google OAuth 2.0
-- **FR2**: Users can view and edit their profile information
-- **FR3**: Users can manage their order history and tracking
-- **FR4**: Users can save favorite lipstick colors and preferences
+| ID  | Requirement        | Description                                             |
+| --- | ------------------ | ------------------------------------------------------- |
+| FR1 | User Registration  | Users can register and login using Google OAuth 2.0     |
+| FR2 | Profile Management | Users can view and edit their profile information       |
+| FR3 | Order History      | Users can manage their order history and tracking       |
+| FR4 | Favorites          | Users can save favorite lipstick colors and preferences |
 
 **AR Try-On System:**
 
-- **FR5**: System can detect user's face in real-time using MediaPipe
-- **FR6**: System can apply virtual lipstick to user's lips with realistic rendering
-- **FR7**: System can adjust lipstick color based on lighting conditions
-- **FR8**: System can provide different lipstick finishes (matte, gloss, metallic)
+| ID  | Requirement          | Description                                                               |
+| --- | -------------------- | ------------------------------------------------------------------------- |
+| FR5 | Facial Detection     | System can detect user's face in real-time using MediaPipe                |
+| FR6 | Lipstick Application | System can apply virtual lipstick to user's lips with realistic rendering |
+| FR7 | Lighting Adaptation  | System can adjust lipstick color based on lighting conditions             |
+| FR8 | Finish Options       | System can provide different lipstick finishes (matte, gloss, metallic)   |
 
 **E-commerce System:**
 
-- **FR9**: Users can browse and search lipstick products
-- **FR10**: Users can add products to shopping cart with quantity management
-- **FR11**: Users can complete purchases using Paystack payment gateway
-- **FR12**: Users can track order status and delivery information
+| ID   | Requirement        | Description                                                 |
+| ---- | ------------------ | ----------------------------------------------------------- |
+| FR9  | Product Browsing   | Users can browse and search lipstick products               |
+| FR10 | Shopping Cart      | Users can add products to cart with quantity management     |
+| FR11 | Payment Processing | Users can complete purchases using Paystack payment gateway |
+| FR12 | Order Tracking     | Users can track order status and delivery information       |
 
 **Admin Management System:**
 
-- **FR13**: Admins can manage product inventory and pricing
-- **FR14**: Admins can process and approve customer orders
-- **FR15**: Admins can view sales analytics and user statistics
-- **FR16**: Admins can manage user accounts and roles
+| ID   | Requirement        | Description                                         |
+| ---- | ------------------ | --------------------------------------------------- |
+| FR13 | Product Management | Admins can manage product inventory and pricing     |
+| FR14 | Order Processing   | Admins can process and approve customer orders      |
+| FR15 | Analytics          | Admins can view sales analytics and user statistics |
+| FR16 | User Management    | Admins can manage user accounts and roles           |
 
 ### 3.6.2 Non-Functional Requirements
 
 **Performance Requirements:**
 
-- **NFR1**: AR application must respond within 100ms for real-time rendering
-- **NFR2**: System must support 100+ concurrent users without degradation
-- **NFR3**: Page load times must be under 3 seconds for optimal user experience
-- **NFR4**: Video processing must maintain 30fps for smooth AR experience
+| ID   | Requirement      | Specification                             |
+| ---- | ---------------- | ----------------------------------------- |
+| NFR1 | AR Response Time | AR application must respond within 100ms  |
+| NFR2 | Concurrent Users | System must support 100+ concurrent users |
+| NFR3 | Page Load Time   | Page load times must be under 3 seconds   |
+| NFR4 | Video Processing | Video processing must maintain 30fps      |
 
 **Security Requirements:**
 
-- **NFR5**: All user data must be encrypted in transit and at rest
-- **NFR6**: Payment processing must be PCI DSS compliant
-- **NFR7**: Authentication must use secure OAuth 2.0 protocols
-- **NFR8**: API endpoints must be protected with JWT token validation
+| ID   | Requirement      | Specification                                          |
+| ---- | ---------------- | ------------------------------------------------------ |
+| NFR5 | Data Encryption  | All user data must be encrypted in transit and at rest |
+| NFR6 | Payment Security | Payment processing must be PCI DSS compliant           |
+| NFR7 | Authentication   | Authentication must use secure OAuth 2.0 protocols     |
+| NFR8 | API Security     | API endpoints must be protected with JWT validation    |
 
 **Usability Requirements:**
 
-- **NFR9**: Interface must be intuitive for users with minimal technical knowledge
-- **NFR10**: System must be accessible on all modern browsers and devices
-- **NFR11**: Mobile responsiveness must be maintained across all screen sizes
-- **NFR12**: Error messages must be clear and actionable for users
+| ID    | Requirement           | Specification                                                          |
+| ----- | --------------------- | ---------------------------------------------------------------------- |
+| NFR9  | User Interface        | Interface must be intuitive for users with minimal technical knowledge |
+| NFR10 | Browser Compatibility | System must be accessible on all modern browsers                       |
+| NFR11 | Mobile Responsiveness | Mobile responsiveness must be maintained across all screen sizes       |
+| NFR12 | Error Handling        | Error messages must be clear and actionable for users                  |
 
 **Reliability Requirements:**
 
-- **NFR13**: System uptime must be 99.9% with automatic failover
-- **NFR14**: Data backup must occur every 24 hours with point-in-time recovery
-- **NFR15**: Error recovery must be automatic with graceful degradation
-- **NFR16**: System must handle network interruptions without data loss
+| ID    | Requirement        | Specification                                              |
+| ----- | ------------------ | ---------------------------------------------------------- |
+| NFR13 | System Uptime      | System uptime must be 99.9% with automatic failover        |
+| NFR14 | Data Backup        | Data backup must occur every 24 hours                      |
+| NFR15 | Error Recovery     | Error recovery must be automatic with graceful degradation |
+| NFR16 | Network Resilience | System must handle network interruptions without data loss |
 
 ## 3.7 Requirements Analysis and Modeling
 
@@ -355,31 +353,66 @@ The project was executed across eight development sprints, each focusing on spec
 
 **Level 0 DFD (Context Diagram):**
 
-- **External Entities**: Customer, Admin, Payment Gateway, MediaPipe API
-- **Central Process**: LushLips AR Try-On System
-- **Data Flows**: User authentication, AR processing, payment transactions, order management
+```mermaid
+graph TD
+    A[Customer] --> B[LushLips AR System]
+    C[Admin] --> B
+    D[Payment Gateway] --> B
+    E[MediaPipe API] --> B
+    B --> A
+    B --> C
+    B --> D
+    B --> E
+
+    style A fill:#e1f5fe
+    style C fill:#f3e5f5
+    style D fill:#e8f5e8
+    style E fill:#fff3e0
+    style B fill:#fce4ec
+```
 
 **Level 1 DFD (System Overview):**
 
-- **Processes**:
-  - P1: User Authentication and Management
-  - P2: AR Facial Detection and Rendering
-  - P3: E-commerce and Shopping Cart
-  - P4: Payment Processing and Order Management
-  - P5: Admin Dashboard and Analytics
-- **Data Stores**:
-  - D1: User Database (Firestore)
-  - D2: Product Database (Firestore)
-  - D3: Order Database (Firestore)
-  - D4: Payment Database (Firestore)
-- **Data Flows**: Authentication tokens, AR video frames, product information, order details, payment confirmations
+```mermaid
+graph TD
+    P1[User Authentication<br/>and Management] --> D1[(User Database)]
+    P2[AR Facial Detection<br/>and Rendering] --> D1
+    P3[E-commerce and<br/>Shopping Cart] --> D2[(Product Database)]
+    P4[Payment Processing<br/>and Order Management] --> D3[(Order Database)]
+    P5[Admin Dashboard<br/>and Analytics] --> D4[(Payment Database)]
+
+    A[Customer] --> P1
+    A --> P2
+    A --> P3
+    A --> P4
+    C[Admin] --> P5
+    D[Payment Gateway] --> P4
+    E[MediaPipe API] --> P2
+
+    P1 --> A
+    P2 --> A
+    P3 --> A
+    P4 --> A
+    P5 --> C
+
+    style P1 fill:#e3f2fd
+    style P2 fill:#f3e5f5
+    style P3 fill:#e8f5e8
+    style P4 fill:#fff3e0
+    style P5 fill:#fce4ec
+    style D1 fill:#f1f8e9
+    style D2 fill:#e0f2f1
+    style D3 fill:#fafafa
+    style D4 fill:#fff8e1
+```
 
 ## 3.8 Logical Design
 
 ### 3.8.1 System Architecture
 
 **Architecture Pattern:**
-The system employs a **Layered Architecture** with microservices principles, ensuring separation of concerns and maintainability:
+
+The system will employ a **Layered Architecture** with microservices principles, ensuring separation of concerns and maintainability:
 
 **Presentation Layer:**
 
@@ -407,30 +440,55 @@ The system employs a **Layered Architecture** with microservices principles, ens
 
 **Component Architecture Diagram:**
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Presentation Layer                       │
-├─────────────────────────────────────────────────────────────┤
-│  Next.js React Components  │  AR Canvas  │  Responsive UI   │
-└─────────────────────────────────────────────────────────────┘
-                              │
-┌─────────────────────────────────────────────────────────────┐
-│                   Business Logic Layer                      │
-├─────────────────────────────────────────────────────────────┤
-│  API Routes  │  AR Processing  │  E-commerce Services       │
-└─────────────────────────────────────────────────────────────┘
-                              │
-┌─────────────────────────────────────────────────────────────┐
-│                    Data Access Layer                        │
-├─────────────────────────────────────────────────────────────┤
-│  Firebase SDK  │  Firebase Admin  │  Cloud Storage          │
-└─────────────────────────────────────────────────────────────┘
-                              │
-┌─────────────────────────────────────────────────────────────┐
-│                  External Services Layer                    │
-├─────────────────────────────────────────────────────────────┤
-│  MediaPipe  │  Paystack  │  Google OAuth  │  Vercel         │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph "Presentation Layer"
+        UI[Next.js React Components]
+        AR[AR Canvas]
+        RESP[Responsive UI]
+    end
+
+    subgraph "Business Logic Layer"
+        API[API Routes]
+        ARP[AR Processing]
+        ECOM[E-commerce Services]
+    end
+
+    subgraph "Data Access Layer"
+        FSDK[Firebase SDK]
+        FADMIN[Firebase Admin]
+        STORAGE[Cloud Storage]
+    end
+
+    subgraph "External Services Layer"
+        MP[MediaPipe]
+        PAY[Paystack]
+        OAUTH[Google OAuth]
+        VERCEL[Vercel]
+    end
+
+    UI --> API
+    AR --> ARP
+    RESP --> API
+    API --> FSDK
+    ARP --> MP
+    ECOM --> PAY
+    FSDK --> OAUTH
+    FADMIN --> STORAGE
+
+    style UI fill:#e3f2fd
+    style AR fill:#f3e5f5
+    style RESP fill:#e8f5e8
+    style API fill:#fff3e0
+    style ARP fill:#fce4ec
+    style ECOM fill:#f1f8e9
+    style FSDK fill:#e0f2f1
+    style FADMIN fill:#fafafa
+    style STORAGE fill:#fff8e1
+    style MP fill:#e8eaf6
+    style PAY fill:#e0f2f1
+    style OAUTH fill:#fff3e0
+    style VERCEL fill:#f3e5f5
 ```
 
 ### 3.8.2 Control Flow and Process Design
@@ -469,12 +527,37 @@ The system employs a **Layered Architecture** with microservices principles, ens
 8. Order is created in database
 9. User receives confirmation and tracking information
 
-**Activity Diagrams:**
+**Activity Diagram for AR Try-On Process:**
 
-- User registration and authentication process
-- AR lipstick application workflow
-- Product purchase and payment flow
-- Admin product management process
+```mermaid
+flowchart TD
+    A[Start AR Try-On] --> B[Request Camera Permission]
+    B --> C{Camera Access Granted?}
+    C -->|No| D[Show Error Message]
+    C -->|Yes| E[Initialize MediaPipe]
+    E --> F[Start Video Stream]
+    F --> G[Detect Facial Landmarks]
+    G --> H{Face Detected?}
+    H -->|No| I[Show "No Face Detected" Message]
+    H -->|Yes| J[Apply Lipstick Color]
+    J --> K[Render on Canvas]
+    K --> L[Display Result]
+    L --> M{User Changes Color?}
+    M -->|Yes| J
+    M -->|No| N{User Saves Result?}
+    N -->|Yes| O[Save to Favorites]
+    N -->|No| P[Continue Try-On]
+    O --> P
+    P --> Q{User Exits?}
+    Q -->|No| G
+    Q -->|Yes| R[Stop Video Stream]
+    R --> S[End AR Session]
+
+    style A fill:#e3f2fd
+    style S fill:#f3e5f5
+    style D fill:#ffebee
+    style I fill:#fff3e0
+```
 
 ### 3.8.3 Non-Functional Requirements Design
 
@@ -514,84 +597,123 @@ The system employs a **Layered Architecture** with microservices principles, ens
 
 **Users Collection:**
 
-```javascript
-{
-  uid: string,                    // Firebase Auth UID (Primary Key)
-  email: string,                  // User email address
-  displayName: string,            // User display name
-  photoURL: string,               // Profile picture URL
-  role: string,                   // User role: 'user' or 'admin'
-  createdAt: timestamp,           // Account creation timestamp
-  lastLogin: timestamp,           // Last login timestamp
-  phone: string,                  // Phone number (optional)
-  bio: string                     // User bio (optional)
-}
-```
+| Field       | Type      | Description                     | Constraints               |
+| ----------- | --------- | ------------------------------- | ------------------------- |
+| uid         | string    | Firebase Auth UID (Primary Key) | Required, Unique          |
+| email       | string    | User email address              | Required, Unique          |
+| displayName | string    | User display name               | Optional                  |
+| photoURL    | string    | Profile picture URL             | Optional                  |
+| role        | string    | User role: 'user' or 'admin'    | Required, Default: 'user' |
+| createdAt   | timestamp | Account creation timestamp      | Required, Auto-generated  |
+| lastLogin   | timestamp | Last login timestamp            | Optional, Auto-updated    |
+| phone       | string    | Phone number                    | Optional                  |
+| bio         | string    | User bio                        | Optional                  |
 
 **Products Collection:**
 
-```javascript
-{
-  id: string,                     // Product ID (Primary Key)
-  name: string,                   // Product name
-  description: string,            // Product description
-  price: number,                  // Product price in KES
-  oldPrice: number,               // Original price for discounts
-  category: string,               // Product category
-  hexColor: string,               // Lipstick color hex code
-  colorName: string,              // Color name (e.g., "Ruby Red")
-  images: array,                  // Product image URLs
-  stock: number,                  // Available stock quantity
-  status: string,                 // Product status: 'active' or 'inactive'
-  createdAt: timestamp,           // Creation timestamp
-  updatedAt: timestamp            // Last update timestamp
-}
-```
+| Field       | Type      | Description                            | Constraints                 |
+| ----------- | --------- | -------------------------------------- | --------------------------- |
+| id          | string    | Product ID (Primary Key)               | Required, Unique            |
+| name        | string    | Product name                           | Required                    |
+| description | string    | Product description                    | Optional                    |
+| price       | number    | Product price in KES                   | Required, > 0               |
+| oldPrice    | number    | Original price for discounts           | Optional, > 0               |
+| category    | string    | Product category                       | Required                    |
+| hexColor    | string    | Lipstick color hex code                | Required                    |
+| colorName   | string    | Color name (e.g., "Ruby Red")          | Required                    |
+| images      | array     | Product image URLs                     | Required, Non-empty         |
+| stock       | number    | Available stock quantity               | Required, >= 0              |
+| status      | string    | Product status: 'active' or 'inactive' | Required, Default: 'active' |
+| createdAt   | timestamp | Creation timestamp                     | Required, Auto-generated    |
+| updatedAt   | timestamp | Last update timestamp                  | Required, Auto-updated      |
 
 **Orders Collection:**
 
-```javascript
-{
-  orderId: string,                // Order ID (Primary Key)
-  userId: string,                 // User ID (Foreign Key)
-  items: array,                   // Ordered products
-  total: number,                  // Total order amount
-  subtotal: number,               // Subtotal before taxes
-  vat: number,                    // Value Added Tax
-  deliveryFee: number,            // Delivery fee
-  status: string,                 // Order status
-  paymentId: string,              // Payment reference
-  deliveryLocation: string,       // Delivery address
-  phoneNumber: string,            // Contact phone
-  paystackRef: string,            // Paystack transaction reference
-  createdAt: timestamp,           // Order creation timestamp
-  updatedAt: timestamp            // Status update timestamp
-}
+| Field            | Type      | Description                    | Constraints              |
+| ---------------- | --------- | ------------------------------ | ------------------------ |
+| orderId          | string    | Order ID (Primary Key)         | Required, Unique         |
+| userId           | string    | User ID (Foreign Key)          | Required                 |
+| items            | array     | Ordered products               | Required, Non-empty      |
+| total            | number    | Total order amount             | Required, > 0            |
+| subtotal         | number    | Subtotal before taxes          | Required, > 0            |
+| vat              | number    | Value Added Tax                | Required, >= 0           |
+| deliveryFee      | number    | Delivery fee                   | Required, >= 0           |
+| status           | string    | Order status                   | Required                 |
+| paymentId        | string    | Payment reference              | Required                 |
+| deliveryLocation | string    | Delivery address               | Required                 |
+| phoneNumber      | string    | Contact phone                  | Required                 |
+| paystackRef      | string    | Paystack transaction reference | Required                 |
+| createdAt        | timestamp | Order creation timestamp       | Required, Auto-generated |
+| updatedAt        | timestamp | Status update timestamp        | Required, Auto-updated   |
+
+**Entity Relationship Diagram:**
+
+```mermaid
+erDiagram
+    USERS {
+        string uid PK
+        string email
+        string displayName
+        string photoURL
+        string role
+        timestamp createdAt
+        timestamp lastLogin
+        string phone
+        string bio
+    }
+
+    PRODUCTS {
+        string id PK
+        string name
+        string description
+        number price
+        number oldPrice
+        string category
+        string hexColor
+        string colorName
+        array images
+        number stock
+        string status
+        timestamp createdAt
+        timestamp updatedAt
+    }
+
+    ORDERS {
+        string orderId PK
+        string userId FK
+        array items
+        number total
+        number subtotal
+        number vat
+        number deliveryFee
+        string status
+        string paymentId FK
+        string deliveryLocation
+        string phoneNumber
+        string paystackRef
+        timestamp createdAt
+        timestamp updatedAt
+    }
+
+    PAYMENTS {
+        string paymentId PK
+        string orderId FK
+        string userId FK
+        number amount
+        string status
+        string method
+        string transactionRef
+        number subtotal
+        number vat
+        number deliveryFee
+        timestamp createdAt
+    }
+
+    USERS ||--o{ ORDERS : places
+    USERS ||--o{ PAYMENTS : makes
+    PRODUCTS ||--o{ ORDERS : contains
+    ORDERS ||--|| PAYMENTS : has
 ```
-
-**Payments Collection:**
-
-```javascript
-{
-  paymentId: string,              // Payment ID (Primary Key)
-  orderId: string,                // Order ID (Foreign Key)
-  userId: string,                 // User ID (Foreign Key)
-  amount: number,                 // Payment amount
-  status: string,                 // Payment status
-  method: string,                 // Payment method
-  transactionRef: string,         // External transaction reference
-  subtotal: number,               // Subtotal amount
-  vat: number,                    // Tax amount
-  deliveryFee: number,            // Delivery fee
-  createdAt: timestamp            // Payment timestamp
-}
-```
-
-**User Subcollections:**
-
-- **users/{uid}/cart**: Shopping cart items
-- **users/{uid}/orders**: User's order history
-- **users/{uid}/payments**: User's payment history
 
 ### 3.9.2 User Interface Design
 
@@ -604,29 +726,33 @@ The system employs a **Layered Architecture** with microservices principles, ens
 
 **Color Scheme:**
 
-- **Primary Color**: #FF6B9D (Pink) - Brand identity and primary actions
-- **Secondary Color**: #4A90E2 (Blue) - Secondary actions and links
-- **Accent Color**: #F39C12 (Orange) - Highlights and notifications
-- **Background**: #FFFFFF (White) - Main background
-- **Text Primary**: #333333 (Dark Gray) - Main text content
-- **Text Secondary**: #666666 (Medium Gray) - Secondary text
-- **Success**: #27AE60 (Green) - Success states
-- **Error**: #E74C3C (Red) - Error states and warnings
+| Color           | Hex Code | Usage                              |
+| --------------- | -------- | ---------------------------------- |
+| Primary Color   | #FF6B9D  | Brand identity and primary actions |
+| Secondary Color | #4A90E2  | Secondary actions and links        |
+| Accent Color    | #F39C12  | Highlights and notifications       |
+| Background      | #FFFFFF  | Main background                    |
+| Text Primary    | #333333  | Main text content                  |
+| Text Secondary  | #666666  | Secondary text                     |
+| Success         | #27AE60  | Success states                     |
+| Error           | #E74C3C  | Error states and warnings          |
 
 **Typography:**
 
-- **Font Family**: Inter, sans-serif (Modern, readable, professional)
-- **Font Sizes**:
-  - Headings: 24px, 32px, 48px (Responsive scaling)
-  - Body Text: 16px (Base size)
-  - Small Text: 14px, 12px
-- **Font Weights**: 400 (Regular), 500 (Medium), 600 (Semi-bold), 700 (Bold)
+| Element    | Font Family       | Font Size        | Font Weight     |
+| ---------- | ----------------- | ---------------- | --------------- |
+| Headings   | Inter, sans-serif | 24px, 32px, 48px | 700 (Bold)      |
+| Body Text  | Inter, sans-serif | 16px             | 400 (Regular)   |
+| Small Text | Inter, sans-serif | 14px, 12px       | 400 (Regular)   |
+| Buttons    | Inter, sans-serif | 16px             | 600 (Semi-bold) |
 
 **Responsive Breakpoints:**
 
-- **Mobile**: 320px - 768px (Primary target)
-- **Tablet**: 768px - 1024px
-- **Desktop**: 1024px+ (Secondary target)
+| Device Type | Breakpoint Range | Primary Target |
+| ----------- | ---------------- | -------------- |
+| Mobile      | 320px - 768px    | ✅ Primary     |
+| Tablet      | 768px - 1024px   | Secondary      |
+| Desktop     | 1024px+          | Secondary      |
 
 **Wireframes and Layouts:**
 
@@ -669,10 +795,53 @@ The system employs a **Layered Architecture** with microservices principles, ens
 
 **Component Design:**
 
-- **Cards**: Rounded corners (16px), subtle shadows, white background
-- **Buttons**: Rounded (24px), hover effects, consistent padding
-- **Forms**: Clean inputs, clear labels, validation feedback
-- **Tables**: Responsive design, sorting, filtering capabilities
-- **Modals**: Centered overlay, backdrop blur, smooth animations
+| Component | Design Specification                                     |
+| --------- | -------------------------------------------------------- |
+| Cards     | Rounded corners (16px), subtle shadows, white background |
+| Buttons   | Rounded (24px), hover effects, consistent padding        |
+| Forms     | Clean inputs, clear labels, validation feedback          |
+| Tables    | Responsive design, sorting, filtering capabilities       |
+| Modals    | Centered overlay, backdrop blur, smooth animations       |
+
+**User Interface Flow Diagram:**
+
+```mermaid
+flowchart TD
+    A[Landing Page] --> B[User Authentication]
+    B --> C{User Type}
+    C -->|Customer| D[Customer Dashboard]
+    C -->|Admin| E[Admin Dashboard]
+
+    D --> F[AR Try-On]
+    D --> G[Product Catalog]
+    D --> H[Shopping Cart]
+    D --> I[Order History]
+
+    E --> J[Product Management]
+    E --> K[Order Processing]
+    E --> L[User Management]
+    E --> M[Analytics]
+
+    F --> N[Camera Access]
+    N --> O[Facial Detection]
+    O --> P[Lipstick Application]
+    P --> Q[Color Selection]
+    Q --> R[Save/Share]
+
+    G --> S[Product Browsing]
+    S --> T[Add to Cart]
+    T --> H
+
+    H --> U[Checkout]
+    U --> V[Payment Processing]
+    V --> W[Order Confirmation]
+
+    style A fill:#e3f2fd
+    style E fill:#f3e5f5
+    style F fill:#e8f5e8
+    style V fill:#fff3e0
+```
 
 This comprehensive system analysis and design provides the foundation for implementing a robust, user-friendly AR lipstick try-on web application that meets all functional and non-functional requirements while ensuring scalability, security, and performance. The design incorporates modern web technologies, best practices for user experience, and a scalable architecture that can accommodate future enhancements and growth.
+
+</div>
