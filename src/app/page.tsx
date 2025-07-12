@@ -87,25 +87,38 @@ export default function Home() {
 								/>
 							</svg>
 							<span className="inline-block bg-pink-100 text-pink-600 font-semibold rounded-full px-4 py-1 text-sm shadow">
-								#1 Virtual Lipstick Try-On
+								Premium Cosmetics & Virtual Try-On
 							</span>
 						</div>
 						<h1 className="text-5xl md:text-7xl font-extrabold text-pink-600 mb-4 tracking-tight drop-shadow-sm">
-							Try On Lipstick Instantly
+							Joanna K Cosmetics
 						</h1>
-						<p className="text-lg md:text-2xl text-gray-700 mb-8 font-medium max-w-2xl mx-auto">
-							Welcome to{" "}
-							<span className="font-bold text-pink-500">LushLips</span> —
-							discover your perfect shade with our cutting-edge virtual try-on.
-							No downloads, no mess, just your camera and a smile. Find your new
-							favorite look in seconds!
+						<p className="text-lg md:text-2xl text-gray-700 mb-8 font-medium max-w-3xl mx-auto">
+							Discover your perfect shade with our{" "}
+							<span className="font-bold text-pink-500">
+								premium lipstick collection
+							</span>{" "}
+							and{" "}
+							<span className="font-bold text-pink-500">
+								cutting-edge virtual try-on technology
+							</span>
+							. Experience luxury cosmetics that enhance your natural beauty
+							with every application.
 						</p>
-						<a
-							href="#products"
-							className="inline-block px-12 py-4 bg-pink-500 text-white rounded-full shadow-xl hover:bg-pink-600 transition font-semibold text-2xl mb-6"
-						>
-							Shop Now
-						</a>
+						<div className="flex flex-col sm:flex-row gap-4 mb-6">
+							<a
+								href="#products"
+								className="inline-block px-12 py-4 bg-pink-500 text-white rounded-full shadow-xl hover:bg-pink-600 transition font-semibold text-2xl"
+							>
+								Shop Collection
+							</a>
+							<a
+								href="/virtual-tryon"
+								className="inline-block px-12 py-4 bg-white border-2 border-pink-500 text-pink-600 rounded-full shadow-xl hover:bg-pink-50 transition font-semibold text-2xl"
+							>
+								Try On Virtually
+							</a>
+						</div>
 						<div className="flex flex-col items-center gap-2">
 							<span className="flex items-center gap-2 text-gray-500 text-sm">
 								<svg
@@ -121,10 +134,10 @@ export default function Home() {
 										d="M5 13l4 4L19 7"
 									/>
 								</svg>
-								Trusted by 10,000+ beauty lovers
+								Premium quality ingredients & cruelty-free
 							</span>
 							<span className="italic text-gray-400 text-xs">
-								“The easiest way to try lipstick online!”
+								&ldquo;Enhancing beauty with innovation and care&rdquo;
 							</span>
 						</div>
 					</div>
@@ -133,12 +146,74 @@ export default function Home() {
 				{/* FEATURE SECTION START */}
 				<FeatureSection />
 				{/* FEATURE SECTION END */}
+				{/* ABOUT US SECTION START */}
+				<section className="w-full flex flex-col items-center py-20 bg-gradient-to-br from-pink-50 to-white">
+					<div className="container max-w-6xl mx-auto px-4">
+						<div className="text-center mb-12">
+							<h2 className="text-4xl md:text-5xl font-extrabold text-pink-600 mb-6 drop-shadow-sm">
+								About Joanna K Cosmetics
+							</h2>
+							<p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+								We are passionate about creating premium cosmetics that enhance
+								your natural beauty. Our commitment to quality, innovation, and
+								customer satisfaction drives everything we do.
+							</p>
+						</div>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+							<div className="space-y-6">
+								<div className="bg-white rounded-2xl p-8 shadow-lg border border-pink-100">
+									<h3 className="text-2xl font-bold text-pink-600 mb-4">
+										Our Mission
+									</h3>
+									<p className="text-gray-600 leading-relaxed">
+										To provide high-quality, innovative cosmetics that empower
+										individuals to express their unique beauty with confidence
+										and style.
+									</p>
+								</div>
+								<div className="bg-white rounded-2xl p-8 shadow-lg border border-pink-100">
+									<h3 className="text-2xl font-bold text-pink-600 mb-4">
+										Quality Promise
+									</h3>
+									<p className="text-gray-600 leading-relaxed">
+										Every product is formulated with premium ingredients,
+										rigorously tested for safety and performance, and crafted to
+										deliver exceptional results.
+									</p>
+								</div>
+							</div>
+							<div className="space-y-6">
+								<div className="bg-white rounded-2xl p-8 shadow-lg border border-pink-100">
+									<h3 className="text-2xl font-bold text-pink-600 mb-4">
+										Innovation
+									</h3>
+									<p className="text-gray-600 leading-relaxed">
+										We combine cutting-edge technology with traditional beauty
+										wisdom to create products that meet the evolving needs of
+										modern consumers.
+									</p>
+								</div>
+								<div className="bg-white rounded-2xl p-8 shadow-lg border border-pink-100">
+									<h3 className="text-2xl font-bold text-pink-600 mb-4">
+										Customer Focus
+									</h3>
+									<p className="text-gray-600 leading-relaxed">
+										Your satisfaction is our priority. We&apos;re dedicated to
+										providing exceptional service and products that exceed your
+										expectations.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+				{/* ABOUT US SECTION END */}
 				<section
 					id="products"
 					className="w-full flex flex-col items-center mt-12"
 				>
 					<h2 className="text-4xl md:text-5xl font-extrabold text-pink-600 mb-8 text-center drop-shadow-sm">
-						Our Lipstick Collection
+						Our Premium Lipstick Collection
 					</h2>
 					<div className="container max-w-8xl mx-auto bg-white/80 rounded-3xl shadow-2xl border border-pink-100 p-6 md:p-12 mb-16 backdrop-blur-md">
 						{loading ? (

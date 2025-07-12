@@ -8,6 +8,8 @@ export interface User {
 	role?: string;
 	bio?: string; // Add bio field
 	phone?: string | null; // Add phone field
+	loyaltyPoints?: number; // Add loyalty points field
+	profileCompleted?: boolean; // Track if profile completion points awarded
 }
 
 // Product document

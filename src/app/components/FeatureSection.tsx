@@ -11,13 +11,13 @@ const features = [
 				<path
 					strokeLinecap="round"
 					strokeLinejoin="round"
-					d="M12 20v-6m0 0V4m0 10l3.5-3.5M12 14l-3.5-3.5"
+					d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
 				/>
 			</svg>
 		),
-		title: "Ultra-Realistic Lipstick AR",
+		title: "Premium Quality Ingredients",
 		description:
-			"See every lipstick shade on your lips in real time with advanced face tracking and natural blending—no surprises, just true-to-life color.",
+			"Formulated with the finest ingredients, our lipsticks provide long-lasting color, hydration, and comfort while maintaining the highest standards of quality and safety.",
 	},
 	{
 		icon: (
@@ -28,13 +28,16 @@ const features = [
 				strokeWidth="2"
 				viewBox="0 0 24 24"
 			>
-				<circle cx="12" cy="12" r="10" />
-				<path strokeLinecap="round" strokeLinejoin="round" d="M8 12h8M12 8v8" />
+				<path
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					d="M13 10V3L4 14h7v7l9-11h-7z"
+				/>
 			</svg>
 		),
-		title: "100+ Lipstick Shades",
+		title: "Advanced Virtual Try-On",
 		description:
-			"Browse a huge collection of lipstick colors and finishes—find your perfect match for any mood, skin tone, or occasion.",
+			"Experience our cutting-edge AR technology that lets you see every shade on your lips in real-time. Find your perfect match before you buy with our innovative virtual try-on.",
 	},
 	{
 		icon: (
@@ -45,13 +48,16 @@ const features = [
 				strokeWidth="2"
 				viewBox="0 0 24 24"
 			>
-				<rect x="4" y="4" width="16" height="16" rx="4" />
-				<path strokeLinecap="round" strokeLinejoin="round" d="M8 12h8" />
+				<path
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+				/>
 			</svg>
 		),
-		title: "No App, Just Lipstick",
+		title: "Cruelty-Free & Ethical",
 		description:
-			"Try on lipsticks instantly in your browser—no downloads, no signups, just pure lipstick fun.",
+			"Committed to beauty without cruelty. Our products are never tested on animals and we maintain the highest ethical standards in our manufacturing and sourcing practices.",
 	},
 ];
 

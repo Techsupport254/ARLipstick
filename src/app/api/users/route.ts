@@ -47,18 +47,33 @@ export async function PATCH(req: NextRequest) {
 		if (body.displayName) updateData.displayName = body.displayName;
 		if (body.bio !== undefined) updateData.bio = body.bio;
 		if (body.phone !== undefined) updateData.phone = body.phone;
-		await admin.admin
-			.firestore()
-			.collection("users")
-			.doc(uid)
-			.set(updateData, { merge: true });
-		const userDoc = await admin.admin
-			.firestore()
-			.collection("users")
-			.doc(uid)
-			.get();
+		const userRef = admin.admin.firestore().collection("users").doc(uid);
+		let awardedPoints = false;
+		await admin.admin.firestore().runTransaction(async (transaction) => {
+			const userDoc = await transaction.get(userRef);
+			const user = userDoc.data() as User | undefined;
+			// Merge new data with existing
+			const merged = { ...user, ...updateData };
+			const hasCompletedProfile = !!(
+				merged.displayName &&
+				merged.bio &&
+				merged.phone
+			);
+			const alreadyAwarded = user?.profileCompleted;
+			transaction.set(userRef, updateData, { merge: true });
+			if (hasCompletedProfile && !alreadyAwarded) {
+				const currentPoints = user?.loyaltyPoints || 0;
+				transaction.set(
+					userRef,
+					{ loyaltyPoints: currentPoints + 20, profileCompleted: true },
+					{ merge: true }
+				);
+				awardedPoints = true;
+			}
+		});
+		const userDoc = await userRef.get();
 		const user = userDoc.data() as User;
-		return NextResponse.json(user);
+		return NextResponse.json({ ...user, awardedProfilePoints: awardedPoints });
 	} catch (error: unknown) {
 		const message = error instanceof Error ? error.message : String(error);
 		return NextResponse.json(

@@ -114,6 +114,20 @@ export async function POST(req: NextRequest) {
 				vat: order.vat,
 				deliveryFee: order.deliveryFee,
 			});
+
+		// Loyalty Points: 1 point per 100 KES spent
+		const pointsEarned = Math.floor(order.total / 100);
+		const userRef = admin.admin.firestore().collection("users").doc(uid);
+		await admin.admin.firestore().runTransaction(async (transaction) => {
+			const userDoc = await transaction.get(userRef);
+			const currentPoints =
+				(userDoc.exists && userDoc.data()?.loyaltyPoints) || 0;
+			transaction.set(
+				userRef,
+				{ loyaltyPoints: currentPoints + pointsEarned },
+				{ merge: true }
+			);
+		});
 		return NextResponse.json({
 			message: "Order and payment created",
 			orderId,

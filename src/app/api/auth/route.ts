@@ -58,19 +58,20 @@ export async function POST(req: NextRequest) {
 			.collection("users")
 			.doc(userRecord.uid);
 		const userDoc: DocumentSnapshot = await userDocRef.get();
+		let userData;
 		if (!userDoc.exists) {
-			await userDocRef.set(
-				{
-					uid: userRecord.uid,
-					email: userRecord.email,
-					displayName: userRecord.displayName,
-					photoURL,
-					createdAt: new Date().toISOString(),
-					role: "user",
-					phone: userRecord.phoneNumber || null,
-				},
-				{ merge: true }
-			);
+			userData = {
+				uid: userRecord.uid,
+				email: userRecord.email,
+				displayName: userRecord.displayName,
+				photoURL,
+				createdAt: new Date().toISOString(),
+				role: "user",
+				phone: userRecord.phoneNumber || null,
+			};
+			await userDocRef.set(userData, { merge: true });
+		} else {
+			userData = userDoc.data();
 		}
 		return NextResponse.json({
 			user: {
@@ -78,6 +79,7 @@ export async function POST(req: NextRequest) {
 				email: userRecord.email,
 				displayName: userRecord.displayName,
 				photoURL,
+				role: userData?.role || "user",
 			},
 		});
 	} catch (error: unknown) {

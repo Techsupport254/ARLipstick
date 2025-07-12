@@ -216,6 +216,8 @@ Tools and techniques will include user interviews, surveys, prototyping, and usa
 
 ### 1.8.1: Stages of Agile Methodology
 
+**Technology Adaptation Note:** The project was initially planned as an Android mobile application but was adapted to a web-based implementation due to technical considerations and broader accessibility requirements. This change allows for cross-platform compatibility and eliminates device-specific limitations while maintaining all core AR functionality.
+
 1. **Conceptualization and Planning**:
 
 Define the app's core features, such as real-time AR makeup application, skin tone detection, and product recommendations.
@@ -232,11 +234,11 @@ Create wireframes and mockups for the app interface and develop a prototype to t
 
 1. **Development**:
 
-Implement AR features using frameworks like ARCore.
+Implement AR features using web-based technologies and MediaPipe.
 
 Integrate machine learning models for facial recognition and makeup application.
 
-Build a scalable backend for product data and user analytics.
+Build a scalable web backend for product data and user analytics using Next.js and Firebase.
 
 1. **Testing and Feedback**:
 
@@ -260,12 +262,12 @@ Release updates with new features like seasonal/ new makeup collections or advan
 
 **1.9 Scope**
 
-This research will focus on the development of an AR makeup try-on application tailored for the Kenyan beauty market. The target population includes tech-savvy consumers aged 18-35 who are active users of smartphones and interested in beauty products. The research will be confined to urban areas where digital literacy and smartphone penetration are relatively high. Potential limitations include varying smartphone capabilities and internet connectivity issues, which will be considered during the development process to ensure accessibility and performance across different devices.
+This research will focus on the development of a web-based AR makeup try-on application tailored for the Kenyan beauty market. The target population includes tech-savvy consumers aged 18-35 who are active users of web browsers and interested in beauty products. The research will be confined to urban areas where digital literacy and internet connectivity are relatively high. The web-based approach ensures cross-platform compatibility and eliminates device-specific limitations, making the application accessible on desktop computers, laptops, tablets, and smartphones through modern web browsers. Potential limitations include internet connectivity issues and browser compatibility, which will be considered during the development process to ensure optimal performance across different devices and browsers.
 
 ### Hardware Requirements
 
-| Hardware | Pricing |
-| --- | --- |
+| Hardware                                                                                                  | Pricing                                                      |
+| --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | Laptop<br><br>Internal Hard disk drive – 500GB<br><br>Processor Speed – 2.4GHz<br><br>RAM – 4GB and above | Available<br><br>Available<br><br>Available<br><br>Available |
 
 ### 1.9.2 Software Requirements
@@ -274,17 +276,23 @@ Software
 
 Use
 
-Pricre
+Price
 
-Android Studio
+Next.js
 
-Android app development
+Web application framework
 
 Free
 
-ARCore
+React
 
-AR for android
+Frontend development
+
+Free
+
+TypeScript
+
+Type-safe JavaScript development
 
 Free
 
@@ -306,9 +314,15 @@ Real-time facial detection (Google)
 
 Free
 
-Blender
+Firebase
 
-3D modeling and makeup asset design
+Backend services & authentication
+
+Free
+
+Vercel
+
+Web deployment platform
 
 Free
 
@@ -398,9 +412,9 @@ The traditional online shopping often results in mismatched products due to inac
 
 ### **2.4.1: Integration**
 
-**Native AR SDKs and Toolkits** ARCore (Google ARCore) are the primary SDKs used for creating immersive AR experiences on mobile devices. They provide built-in support for facial tracking, environment understanding, and real-time rendering which are essential for applying virtual makeup accurately.
+**Web-based AR Technologies** MediaPipe and WebRTC are the primary technologies used for creating immersive AR experiences in web browsers. They provide built-in support for facial tracking, environment understanding, and real-time rendering which are essential for applying virtual makeup accurately.
 
-Integration with native development environments like Kotlin/ Java for Android allows direct access to camera APIs, real-time rendering engines, and device sensors.
+Integration with modern web development frameworks like Next.js and React allows direct access to camera APIs, real-time rendering engines, and device sensors through web standards.
 
 **E-commerce Platform Integration** AR modules are embedded into e-commerce platforms using APIs and SDKs, enabling real-time virtual try-on directly within product pages. This seamless integration allows users to immediately try cosmetics while browsing and adding products to their cart without switching platforms. Integration with platforms like Shopify, Magento, or Woo Commerce are becoming more streamlined through plug-and-play AR widgets and cloud-based AR rendering services. This integration supports personalized product recommendations, synchronized inventory updates, and user analytics for marketers.
 
@@ -447,31 +461,31 @@ Wu, C. (2021).
 
 ### **Project Schedule**
 
-| **Phase** | **Activity** | **Expected Start Date** | **Accurate Start Date** | **Expected End Date** | **Accurate End Date** | **Deliverable** |
-| --- | --- | --- | --- | --- | --- | --- |
-| **Phase 1: Conceptualization and Planning** | **Define core features (AR makeup, skin tone detection)** | **03/02/2025** |     | **07/02/2025** |     | **Feature specification document** |
-|     | **Collaborate with stakeholder** | **10/02/2025** |     | **21/02/2025** |     | **Gather requirements** |
-|     | **Proposal Drafting** | **25/02/2025** |     | **31/03/2025** |     | **Document Chapter 1 and 2** |
-| **Phase 2: Sprint Planning** | **Sprint backlog setup & task distribution** | **04/03/2025** |     | **09/03/2025** |     | **Breakdown taks** |
-| **Phase 3: Design and Prototyping** | **Create wireframes & UI mockups** | **10/03/2025** |     | **12/03/2025** |     | **UI mockups** |
-|     | **Design system architecture** | **13/03/2025** |     | **19/03/2025** |     | **Architecture document** |
-|     | **Develop AR prototype for testing** | **20/03/2025** |     | **28/03/2025** |     | **AR test prototype** |
-| **Phase 4: Development** | **Develop facial detection module** | **01/04/2025** |     | **10/04/2025** |     | **Facial tracking module** |
-|     | **Integrate AR makeup overlays** | **11/04/2025** |     | **20/04/2025** |     | **Real-time AR makeup module** |
-|     | **Implement AI for shade matching** | **21/04/2025** |     | **28/04/2025** |     | **Shade matcher AI** |
-|     | **Backend development & product DB** | **29/04/2025** |     | **07/05/2025** |     | **Backend and product API** |
-|     | **Complete full app prototype** | **08/05/2025** |     | **15/05/2025** |     | **Functional AR Try-On app** |
-| **Phase 5: Testing and Feedback** | **Perform unit testing** | **16/05/2025** |     | **22/05/2025** |     | **Unit test report** |
-|     | **Integration testing** | **23/05/2025** |     | **30/05/2025** |     | **Integration report** |
-|     | **User experience testing** | **31/05/2025** |     | **06/06/2025** |     | **Feedback report** |
-|     | **Gather user feedback** | **07/06/2025** |     | **10/06/2025** |     | **Feedback & improvement log** |
-| **Phase 6: Iteration and Refinement** | **Fix bugs and improve features** | **11/06/2025** |     | **17/06/2025** |     | **Bug report & revised build** |
-|     | **Optimize AR and performance** | **18/06/2025** |     | **24/06/2025** |     | **Performance-improved build** |
-| **Phase 7: Deployment and Monitoring** | **Finalize deployment plan** | **25/06/2025** |     | **27/06/2025** |     | **Deployment document** |
-|     | **Deploy demo app** | **28/06/2025** |     | **05/07/2025** |     | **Deployed AR makeup app** |
-|     | **Monitor user activity & analytics** | **06/07/2025** |     | **12/07/2025** |     | **User analytics report** |
-| **Phase 8: Continuous Improvement** | **Release updates** | **13/07/2025** |     | **20/07/2025** |     | **Updated app release** |
-|     | **Add advanced AR features** | **21/07/2025** |     | **10/08/2025** |     | **Enhanced AR capabilities** |
+| **Phase**                                   | **Activity**                                              | **Expected Start Date** | **Accurate Start Date** | **Expected End Date** | **Accurate End Date** | **Deliverable**                        |
+| ------------------------------------------- | --------------------------------------------------------- | ----------------------- | ----------------------- | --------------------- | --------------------- | -------------------------------------- |
+| **Phase 1: Conceptualization and Planning** | **Define core features (AR makeup, skin tone detection)** | **03/02/2025**          |                         | **07/02/2025**        |                       | **Feature specification document**     |
+|                                             | **Collaborate with stakeholder**                          | **10/02/2025**          |                         | **21/02/2025**        |                       | **Gather requirements**                |
+|                                             | **Proposal Drafting**                                     | **25/02/2025**          |                         | **31/03/2025**        |                       | **Document Chapter 1 and 2**           |
+| **Phase 2: Sprint Planning**                | **Sprint backlog setup & task distribution**              | **04/03/2025**          |                         | **09/03/2025**        |                       | **Breakdown taks**                     |
+| **Phase 3: Design and Prototyping**         | **Create wireframes & UI mockups**                        | **10/03/2025**          |                         | **12/03/2025**        |                       | **UI mockups**                         |
+|                                             | **Design system architecture**                            | **13/03/2025**          |                         | **19/03/2025**        |                       | **Architecture document**              |
+|                                             | **Develop AR prototype for testing**                      | **20/03/2025**          |                         | **28/03/2025**        |                       | **AR test prototype**                  |
+| **Phase 4: Development**                    | **Develop facial detection module**                       | **01/04/2025**          |                         | **10/04/2025**        |                       | **Facial tracking module**             |
+|                                             | **Integrate AR makeup overlays**                          | **11/04/2025**          |                         | **20/04/2025**        |                       | **Real-time AR makeup module**         |
+|                                             | **Implement AI for shade matching**                       | **21/04/2025**          |                         | **28/04/2025**        |                       | **Shade matcher AI**                   |
+|                                             | **Backend development & product DB**                      | **29/04/2025**          |                         | **07/05/2025**        |                       | **Backend and product API**            |
+|                                             | **Complete full app prototype**                           | **08/05/2025**          |                         | **15/05/2025**        |                       | **Functional Web-based AR Try-On app** |
+| **Phase 5: Testing and Feedback**           | **Perform unit testing**                                  | **16/05/2025**          |                         | **22/05/2025**        |                       | **Unit test report**                   |
+|                                             | **Integration testing**                                   | **23/05/2025**          |                         | **30/05/2025**        |                       | **Integration report**                 |
+|                                             | **User experience testing**                               | **31/05/2025**          |                         | **06/06/2025**        |                       | **Feedback report**                    |
+|                                             | **Gather user feedback**                                  | **07/06/2025**          |                         | **10/06/2025**        |                       | **Feedback & improvement log**         |
+| **Phase 6: Iteration and Refinement**       | **Fix bugs and improve features**                         | **11/06/2025**          |                         | **17/06/2025**        |                       | **Bug report & revised build**         |
+|                                             | **Optimize AR and performance**                           | **18/06/2025**          |                         | **24/06/2025**        |                       | **Performance-improved build**         |
+| **Phase 7: Deployment and Monitoring**      | **Finalize deployment plan**                              | **25/06/2025**          |                         | **27/06/2025**        |                       | **Deployment document**                |
+|                                             | **Deploy demo app**                                       | **28/06/2025**          |                         | **05/07/2025**        |                       | **Deployed Web-based AR makeup app**   |
+|                                             | **Monitor user activity & analytics**                     | **06/07/2025**          |                         | **12/07/2025**        |                       | **User analytics report**              |
+| **Phase 8: Continuous Improvement**         | **Release updates**                                       | **13/07/2025**          |                         | **20/07/2025**        |                       | **Updated app release**                |
+|                                             | **Add advanced AR features**                              | **21/07/2025**          |                         | **10/08/2025**        |                       | **Enhanced AR capabilities**           |
 
 ### **Gantt Chart**
 
@@ -481,11 +495,11 @@ Figure 0‑1 Gantt chart
 
 ### **Budget**
 
-| **ITEM** | **COST(Kshs)** |
-| --- | --- |
-| Internet and Airtime | **4000** |
-| Printing | **1000** |
-| Transport | **2000** |
-| Laptop | **54000** |
-| Extra Expenses | **3000** |
-| **TOTAL** | **64000** |
+| **ITEM**             | **COST(Kshs)** |
+| -------------------- | -------------- |
+| Internet and Airtime | **4000**       |
+| Printing             | **1000**       |
+| Transport            | **2000**       |
+| Laptop               | **54000**      |
+| Extra Expenses       | **3000**       |
+| **TOTAL**            | **64000**      |

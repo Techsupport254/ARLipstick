@@ -36,6 +36,7 @@ export default function LoginPage() {
 				const data = await res.json();
 				setUser(data.user);
 				console.log("User object (onAuthStateChanged):", data.user);
+				// All users go to dashboard, which shows different content based on role
 				router.replace("/dashboard");
 			}
 		});
@@ -60,6 +61,7 @@ export default function LoginPage() {
 			if (res.ok) {
 				setUser(data.user);
 				console.log("User object (login):", data.user);
+				// All users go to dashboard, which shows different content based on role
 				router.replace("/dashboard");
 			} else {
 				setError(data.message || "Login failed");
@@ -90,10 +92,10 @@ export default function LoginPage() {
 						<div className="absolute -bottom-1 -left-1 w-4 h-4 bg-purple-300 rounded-full opacity-60 animate-pulse delay-1000"></div>
 					</div>
 					<h1 className="text-2xl sm:text-3xl font-extrabold text-pink-600 tracking-tight mb-2 text-center">
-						LushLips
+						Joanna K Cosmetics
 					</h1>
 					<p className="text-gray-600 text-sm sm:text-base text-center font-medium">
-						Virtual Try-On Experience
+						Premium Cosmetics & Virtual Try-On
 					</p>
 					<p className="text-gray-500 text-xs sm:text-sm mt-1 text-center">
 						Sign in to continue
@@ -165,11 +167,11 @@ export default function LoginPage() {
 						<div className="mt-6 space-y-3">
 							<div className="flex items-center gap-3 text-xs sm:text-sm text-gray-600">
 								<div className="w-2 h-2 bg-pink-400 rounded-full"></div>
-								<span>Try on lipstick virtually with AR</span>
+								<span>Premium quality cosmetics</span>
 							</div>
 							<div className="flex items-center gap-3 text-xs sm:text-sm text-gray-600">
 								<div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-								<span>Shop and manage your orders</span>
+								<span>Advanced virtual try-on technology</span>
 							</div>
 							<div className="flex items-center gap-3 text-xs sm:text-sm text-gray-600">
 								<div className="w-2 h-2 bg-rose-400 rounded-full"></div>

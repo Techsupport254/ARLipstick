@@ -16,7 +16,8 @@ export default function Footer() {
 						<rect x="15" y="28" width="6" height="3" rx="1.5" fill="#e11d48" />
 						<rect x="16.5" y="5" width="3" height="5" rx="1.5" fill="#f472b6" />
 					</svg>
-					LushLips &copy; {new Date().getFullYear()}. All rights reserved.
+					Joanna K Cosmetics &copy; {new Date().getFullYear()}. All rights
+					reserved.
 				</div>
 				<div className="flex items-center gap-4 text-base">
 					<a href="#" className="hover:text-pink-500 transition">

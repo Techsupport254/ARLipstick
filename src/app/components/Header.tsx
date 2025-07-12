@@ -85,7 +85,7 @@ export default function Header() {
 						<rect x="16.5" y="5" width="3" height="5" rx="1.5" fill="#f472b6" />
 					</svg>
 					<span className="text-xl sm:text-2xl md:text-3xl font-extrabold text-pink-600 tracking-tight">
-						LushLips
+						Joanna K Cosmetics
 					</span>
 				</Link>
 				<nav className="hidden md:flex space-x-8 ml-4 sm:ml-6">

@@ -18,6 +18,11 @@ const nextConfig = {
 			},
 		],
 		unoptimized: true,
+		domains: [
+			"res.cloudinary.com",
+			"lh3.googleusercontent.com",
+			"joannakcosmetics.com",
+		],
 	},
 	webpack: (config, { isServer }) => {
 		if (!isServer) {
