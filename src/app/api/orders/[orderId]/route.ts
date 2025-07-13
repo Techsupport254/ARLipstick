@@ -1,8 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
-import * as admin from "../../../firebaseAdmin";
 import type { GlobalOrder } from "../../../types/models";
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ orderId: string }> }) {
+// Prevent static generation of this API route
+export const dynamic = "force-dynamic";
+
+function isFirebaseConfigured() {
+	return !!(
+		process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID &&
+		process.env.FIREBASE_CLIENT_EMAIL &&
+		process.env.FIREBASE_PRIVATE_KEY
+	);
+}
+
+export async function PATCH(
+	req: NextRequest,
+	{ params }: { params: Promise<{ orderId: string }> }
+) {
+	if (!isFirebaseConfigured()) {
+		return NextResponse.json(
+			{ message: "Firebase credentials not configured" },
+			{ status: 500 }
+		);
+	}
+
 	const { orderId } = await params;
 	try {
 		if (!orderId) {
@@ -12,8 +32,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ or
 		if (!status) {
 			return NextResponse.json({ message: "Missing status" }, { status: 400 });
 		}
+
+		const { getFirebaseAdmin } = await import("../../../firebaseAdmin");
+		const firebaseApp = getFirebaseAdmin();
+		if (!firebaseApp) {
+			return NextResponse.json(
+				{ message: "Failed to initialize Firebase Admin" },
+				{ status: 500 }
+			);
+		}
+
 		// Update global order
-		const orderRef = admin.admin.firestore().collection("orders").doc(orderId);
+		const orderRef = firebaseApp.firestore().collection("orders").doc(orderId);
 		const orderSnap = await orderRef.get();
 		if (!orderSnap.exists) {
 			return NextResponse.json({ message: "Order not found" }, { status: 404 });
@@ -22,7 +52,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ or
 		const updatedOrder = (await orderRef.get()).data() as GlobalOrder;
 		// Also update in user subcollection
 		if (updatedOrder && updatedOrder.userId) {
-			const userOrderRef = admin.admin
+			const userOrderRef = firebaseApp
 				.firestore()
 				.collection("users")
 				.doc(updatedOrder.userId)
@@ -38,3 +68,5 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ or
 		);
 	}
 }
+
+// Add similar isFirebaseConfigured check to any other handlers here if present

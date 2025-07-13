@@ -1,38 +1,31 @@
 import * as admin from "firebase-admin";
+import serviceAccount from "../secret/firebase-service-account.json";
 
-function getFirebaseAdminConfig() {
-	const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-	const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-	let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+let firebaseApp: admin.app.App | null = null;
 
-	if (!projectId || !clientEmail || !privateKey) {
-		throw new Error(
-			"Missing Firebase Admin credentials in environment variables."
-		);
+export function getFirebaseAdmin() {
+	if (!firebaseApp) {
+		try {
+			// Check if Firebase app is already initialized
+			const existingApps = admin.apps;
+			if (existingApps.length > 0) {
+				firebaseApp = existingApps[0];
+				console.log("Using existing Firebase Admin app");
+			} else {
+				console.log("Initializing Firebase Admin...");
+				firebaseApp = admin.initializeApp({
+					credential: admin.credential.cert(
+						serviceAccount as admin.ServiceAccount
+					),
+				});
+				console.log("Firebase Admin initialized successfully");
+			}
+		} catch (error) {
+			console.error("Failed to initialize Firebase Admin:", error);
+			throw error;
+		}
 	}
-
-	if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
-		privateKey = privateKey.slice(1, -1);
-	}
-	privateKey = privateKey.replace(/\\n/g, "\n");
-
-	return {
-		credential: admin.credential.cert({
-			projectId,
-			clientEmail,
-			privateKey,
-		}),
-	};
-}
-
-if (
-	!(globalThis as unknown as { _firebaseAdminInitialized?: boolean })
-		._firebaseAdminInitialized
-) {
-	admin.initializeApp(getFirebaseAdminConfig());
-	(
-		globalThis as unknown as { _firebaseAdminInitialized?: boolean }
-	)._firebaseAdminInitialized = true;
+	return firebaseApp;
 }
 
 export { admin };

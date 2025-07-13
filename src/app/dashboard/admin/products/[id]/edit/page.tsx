@@ -8,7 +8,11 @@ import type { Product } from "@/app/types/models";
 
 export default function EditProductPage() {
 	const router = useRouter();
-	const { id } = useParams();
+	const params = useParams();
+	const id =
+		params && typeof params === "object" && "id" in params
+			? params.id
+			: undefined;
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState("");

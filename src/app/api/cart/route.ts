@@ -1,18 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
-import * as admin from "../../firebaseAdmin";
 import type { CartItem } from "../../types/models";
+
+// Prevent static generation of this API route
+export const dynamic = "force-dynamic";
+
+function isFirebaseConfigured() {
+	return !!(
+		process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID &&
+		process.env.FIREBASE_CLIENT_EMAIL &&
+		process.env.FIREBASE_PRIVATE_KEY
+	);
+}
 
 // Helper to get user from idToken
 async function getUserFromRequest(req: NextRequest) {
 	const authHeader = req.headers.get("authorization");
 	if (!authHeader) throw new Error("Missing Authorization header");
 	const idToken = authHeader.replace("Bearer ", "");
-	const decoded = await admin.admin.auth().verifyIdToken(idToken);
+
+	const { getFirebaseAdmin } = await import("../../firebaseAdmin");
+	const firebaseApp = getFirebaseAdmin();
+	if (!firebaseApp) {
+		throw new Error("Failed to initialize Firebase Admin");
+	}
+	const decoded = await firebaseApp.auth().verifyIdToken(idToken);
 	return decoded.uid;
 }
 
 // POST: Add item to cart
 export async function POST(req: NextRequest) {
+	if (!isFirebaseConfigured()) {
+		return NextResponse.json(
+			{ message: "Firebase credentials not configured" },
+			{ status: 500 }
+		);
+	}
+
 	try {
 		let body;
 		try {
@@ -40,8 +63,17 @@ export async function POST(req: NextRequest) {
 				{ status: 400 }
 			);
 		}
+
+		const { getFirebaseAdmin } = await import("../../firebaseAdmin");
+		const firebaseApp = getFirebaseAdmin();
+		if (!firebaseApp) {
+			return NextResponse.json(
+				{ message: "Failed to initialize Firebase Admin" },
+				{ status: 500 }
+			);
+		}
 		// Add or update cart item
-		const cartRef = admin.admin
+		const cartRef = firebaseApp
 			.firestore()
 			.collection("users")
 			.doc(uid)
@@ -75,9 +107,25 @@ export async function POST(req: NextRequest) {
 
 // GET: Fetch user's cart
 export async function GET(req: NextRequest) {
+	if (!isFirebaseConfigured()) {
+		return NextResponse.json(
+			{ message: "Firebase credentials not configured" },
+			{ status: 500 }
+		);
+	}
+
 	try {
 		const uid = await getUserFromRequest(req);
-		const cartSnap = await admin.admin
+		const { getFirebaseAdmin } = await import("../../firebaseAdmin");
+		const firebaseApp = getFirebaseAdmin();
+		if (!firebaseApp) {
+			return NextResponse.json(
+				{ message: "Failed to initialize Firebase Admin" },
+				{ status: 500 }
+			);
+		}
+
+		const cartSnap = await firebaseApp
 			.firestore()
 			.collection("users")
 			.doc(uid)
@@ -103,15 +151,31 @@ export async function GET(req: NextRequest) {
 
 // DELETE: Clear user's cart
 export async function DELETE(req: NextRequest) {
+	if (!isFirebaseConfigured()) {
+		return NextResponse.json(
+			{ message: "Firebase credentials not configured" },
+			{ status: 500 }
+		);
+	}
+
 	try {
 		const uid = await getUserFromRequest(req);
-		const cartRef = admin.admin
+		const { getFirebaseAdmin } = await import("../../firebaseAdmin");
+		const firebaseApp = getFirebaseAdmin();
+		if (!firebaseApp) {
+			return NextResponse.json(
+				{ message: "Failed to initialize Firebase Admin" },
+				{ status: 500 }
+			);
+		}
+
+		const cartRef = firebaseApp
 			.firestore()
 			.collection("users")
 			.doc(uid)
 			.collection("cart");
 		const cartSnap = await cartRef.get();
-		const batch = admin.admin.firestore().batch();
+		const batch = firebaseApp.firestore().batch();
 		cartSnap.docs.forEach((doc) => batch.delete(doc.ref));
 		await batch.commit();
 		return NextResponse.json({ message: "Cart cleared" });

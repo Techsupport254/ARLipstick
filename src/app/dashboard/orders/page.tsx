@@ -71,16 +71,31 @@ const columns = [
 		title: "Status",
 		dataIndex: "status",
 		key: "status",
-		render: (status: string) => (
-			<Badge
-				status={status === "paid" ? "success" : "default"}
-				text={
-					status === "paid"
-						? "Paid"
-						: status.charAt(0).toUpperCase() + status.slice(1)
-				}
-			/>
-		),
+		render: (status: string) => {
+			let bg = "bg-gray-400";
+			let text = "Pending";
+			if (status === "paid") {
+				bg = "bg-green-500";
+				text = "Paid";
+			} else if (status === "approved") {
+				bg = "bg-blue-500";
+				text = "Approved";
+			} else if (status === "pending") {
+				bg = "bg-gray-400";
+				text = "Pending";
+			} else if (status === "cancelled" || status === "canceled") {
+				bg = "bg-red-500";
+				text = "Cancelled";
+			}
+			return (
+				<span
+					className={`inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold text-white ${bg}`}
+					style={{ minWidth: 90, justifyContent: "center" }}
+				>
+					{text}
+				</span>
+			);
+		},
 	},
 	{
 		title: "Total",
@@ -238,6 +253,28 @@ export default function OrdersPage() {
 								rowKey="orderId"
 								className="rounded-xl overflow-hidden min-w-[700px]"
 								scroll={{ x: true }}
+								expandable={{
+									expandedRowRender: (order: GlobalOrder) => (
+										<div className="bg-pink-50/60 rounded-xl p-4">
+											<h4 className="text-pink-500 font-semibold mb-2">
+												Products in this order:
+											</h4>
+											<Table
+												columns={getProductColumns()}
+												dataSource={getOrderItemsWithProductInfo(
+													order,
+													products
+												)}
+												pagination={false}
+												rowKey="productId"
+												size="small"
+												className="bg-white rounded-lg"
+											/>
+										</div>
+									),
+									expandRowByClick: true,
+									defaultExpandAllRows: false,
+								}}
 							/>
 						</div>
 					)}

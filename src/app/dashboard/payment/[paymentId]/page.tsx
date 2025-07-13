@@ -29,7 +29,11 @@ function formatValue(key: string, value: unknown): string | React.ReactNode {
 }
 
 export default function PaymentDetailsPage() {
-	const { paymentId } = useParams();
+	const params = useParams();
+	const paymentId =
+		params && typeof params === "object" && "paymentId" in params
+			? params.paymentId
+			: undefined;
 	const [loading, setLoading] = useState(true);
 	const [payment, setPayment] = useState<unknown>(null);
 	const [error, setError] = useState("");

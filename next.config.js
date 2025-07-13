@@ -34,6 +34,8 @@ const nextConfig = {
 		}
 		return config;
 	},
+	// Disable static generation for the entire app to prevent API route prerendering
+	output: "standalone",
 };
 
 module.exports = nextConfig;

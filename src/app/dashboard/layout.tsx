@@ -98,7 +98,7 @@ export default function DashboardLayout({
 		return items.length ? items : [{ name: "Dashboard" }];
 	}
 
-	const breadcrumbItems = getBreadcrumbItems(pathname);
+	const breadcrumbItems = getBreadcrumbItems(pathname || "");
 
 	return (
 		<div className="min-h-screen flex bg-gradient-to-br from-pink-100 via-rose-50 to-purple-100 overflow-x-hidden">
@@ -106,7 +106,7 @@ export default function DashboardLayout({
 			<Sidebar
 				isAdmin={isAdmin}
 				onLogout={handleLogout}
-				current={pathname}
+				current={pathname || ""}
 				open={sidebarOpen}
 			/>
 			{/* Backdrop for mobile sidebar */}

@@ -1,59 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
-import * as admin from "firebase-admin";
 import type {
 	DocumentReference,
 	DocumentSnapshot,
 } from "firebase-admin/firestore";
 
-// Helper to ensure private key is loaded and formatted
-function getFirebaseAdminConfig() {
-	const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-	const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-	let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+// Prevent static generation of this API route
+export const dynamic = "force-dynamic";
 
-	if (!projectId || !clientEmail || !privateKey) {
-		throw new Error(
-			"Missing Firebase Admin credentials in environment variables."
-		);
-	}
-
-	// Fix for Vercel/Next: handle escaped newlines
-	if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
-		privateKey = privateKey.slice(1, -1);
-	}
-	privateKey = privateKey.replace(/\\n/g, "\n");
-
-	return {
-		credential: admin.credential.cert({
-			projectId,
-			clientEmail,
-			privateKey,
-		}),
-	};
-}
-
-// Use global to prevent re-initialization in dev
-if (
-	!(globalThis as unknown as { _firebaseAdminInitialized: boolean })
-		._firebaseAdminInitialized
-) {
-	admin.initializeApp(getFirebaseAdminConfig());
-	(
-		globalThis as unknown as { _firebaseAdminInitialized: boolean }
-	)._firebaseAdminInitialized = true;
+function isFirebaseConfigured() {
+	return !!(
+		process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID &&
+		process.env.FIREBASE_CLIENT_EMAIL &&
+		process.env.FIREBASE_PRIVATE_KEY
+	);
 }
 
 export async function POST(req: NextRequest) {
+	if (!isFirebaseConfigured()) {
+		return NextResponse.json(
+			{ message: "Firebase credentials not configured" },
+			{ status: 500 }
+		);
+	}
+
 	try {
 		const { idToken } = await req.json();
 		if (!idToken) {
 			return NextResponse.json({ message: "Missing idToken" }, { status: 400 });
 		}
-		const decodedToken = await admin.auth().verifyIdToken(idToken);
-		const userRecord = await admin.auth().getUser(decodedToken.uid);
+
+		const { getFirebaseAdmin } = await import("../../firebaseAdmin");
+		const firebaseApp = getFirebaseAdmin();
+		if (!firebaseApp) {
+			return NextResponse.json(
+				{ message: "Failed to initialize Firebase Admin" },
+				{ status: 500 }
+			);
+		}
+		const decodedToken = await firebaseApp.auth().verifyIdToken(idToken);
+		const userRecord = await firebaseApp.auth().getUser(decodedToken.uid);
 		// Fallback: use decodedToken.picture if userRecord.photoURL is missing
 		const photoURL = userRecord.photoURL || decodedToken.picture || null;
-		const userDocRef: DocumentReference = admin
+		const userDocRef: DocumentReference = firebaseApp
 			.firestore()
 			.collection("users")
 			.doc(userRecord.uid);

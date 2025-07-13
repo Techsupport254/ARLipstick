@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
-import { admin } from "../../firebaseAdmin";
 import type { Product } from "../../types/models";
 import cloudinary from "cloudinary";
+
+// Prevent static generation of this API route
+export const dynamic = "force-dynamic";
 
 cloudinary.v2.config({
 	cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -9,9 +11,33 @@ cloudinary.v2.config({
 	api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+function isFirebaseConfigured() {
+	return !!(
+		process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID &&
+		process.env.FIREBASE_CLIENT_EMAIL &&
+		process.env.FIREBASE_PRIVATE_KEY
+	);
+}
+
 export async function GET() {
+	if (!isFirebaseConfigured()) {
+		return NextResponse.json(
+			{ message: "Firebase credentials not configured" },
+			{ status: 500 }
+		);
+	}
+
 	try {
-		const snapshot = await admin.firestore().collection("products").get();
+		const { getFirebaseAdmin } = await import("../../firebaseAdmin");
+		const firebaseApp = getFirebaseAdmin();
+		if (!firebaseApp) {
+			return NextResponse.json(
+				{ message: "Failed to initialize Firebase Admin" },
+				{ status: 500 }
+			);
+		}
+
+		const snapshot = await firebaseApp.firestore().collection("products").get();
 		const products: Product[] = snapshot.docs.map((doc) => ({
 			id: doc.id,
 			...(doc.data() as Omit<Product, "id">),
@@ -26,6 +52,13 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+	if (!isFirebaseConfigured()) {
+		return NextResponse.json(
+			{ message: "Firebase credentials not configured" },
+			{ status: 500 }
+		);
+	}
+
 	try {
 		const body = await req.json();
 		const { name, colorName, hexColor, price, imageUrl, stock } = body;
@@ -42,9 +75,19 @@ export async function POST(req: Request) {
 				{ status: 400 }
 			);
 		}
+
+		const { getFirebaseAdmin } = await import("../../firebaseAdmin");
+		const firebaseApp = getFirebaseAdmin();
+		if (!firebaseApp) {
+			return NextResponse.json(
+				{ message: "Failed to initialize Firebase Admin" },
+				{ status: 500 }
+			);
+		}
+
 		const numericStock = Number(stock);
 		const status = numericStock === 0 ? "sold out" : "on sale";
-		const docRef = await admin
+		const docRef = await firebaseApp
 			.firestore()
 			.collection("products")
 			.add({
@@ -95,7 +138,17 @@ export async function PATCH(req: Request) {
 		} else {
 			delete fields.status; // Don't allow manual status update
 		}
-		await admin.firestore().collection("products").doc(id).update(fields);
+
+		const { getFirebaseAdmin } = await import("../../firebaseAdmin");
+		const firebaseApp = getFirebaseAdmin();
+		if (!firebaseApp) {
+			return NextResponse.json(
+				{ message: "Failed to initialize Firebase Admin" },
+				{ status: 500 }
+			);
+		}
+
+		await firebaseApp.firestore().collection("products").doc(id).update(fields);
 		return NextResponse.json({ message: "Product updated" });
 	} catch (error) {
 		return NextResponse.json(

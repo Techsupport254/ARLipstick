@@ -79,7 +79,7 @@ function VirtualTryOnContent() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
 	const searchParams = useSearchParams();
-	const selectedId = searchParams.get("id");
+	const selectedId = searchParams ? searchParams.get("id") : null;
 	const [selectedIdx, setSelectedIdx] = useState<number>(0);
 	const [cartMessage, setCartMessage] = useState("");
 

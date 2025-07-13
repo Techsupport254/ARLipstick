@@ -1,4 +1,174 @@
-**AUGMENTED REALITY SYTEM FOR MAKEUP TRY-ON**
+<style>
+
+body {
+font-family: 'Times New Roman', serif;
+font-size: 12pt;
+line-height: 1.5;
+text-align: justify;
+margin: 1in;
+color: #000000;
+}
+
+h1 {
+font-size: 16pt;
+font-weight: bold;
+text-align: center;
+margin-top: 2em;
+margin-bottom: 1em;
+page-break-before: always;
+text-transform: uppercase;
+}
+
+h2 {
+font-size: 14pt;
+font-weight: bold;
+margin-top: 1.5em;
+margin-bottom: 0.5em;
+text-transform: capitalize;
+}
+
+h3 {
+font-size: 12pt;
+font-weight: bold;
+margin-top: 1em;
+margin-bottom: 0.5em;
+text-transform: capitalize;
+}
+
+h4 {
+font-size: 11pt;
+font-weight: bold;
+margin-top: 0.75em;
+margin-bottom: 0.25em;
+text-transform: capitalize;
+}
+
+p {
+margin-bottom: 1em;
+text-indent: 0.5in;
+text-align: justify;
+}
+
+table {
+width: 100%;
+border-collapse: collapse;
+margin: 1em 0;
+font-size: 11pt;
+}
+
+th, td {
+border: 1px solid #000000;
+padding: 8px;
+text-align: left;
+vertical-align: top;
+}
+
+th {
+background-color: #f0f0f0;
+font-weight: bold;
+}
+
+caption {
+font-weight: bold;
+text-align: left;
+margin-bottom: 0.5em;
+font-size: 11pt;
+font-style: italic;
+}
+
+ul, ol {
+margin-left: 1in;
+margin-bottom: 1em;
+}
+
+li {
+margin-bottom: 0.25em;
+}
+
+blockquote {
+margin-left: 1in;
+margin-right: 1in;
+font-style: italic;
+border-left: 3px solid #000000;
+padding-left: 1em;
+}
+
+code {
+font-family: 'Courier New', monospace;
+background-color: #f5f5f5;
+padding: 2px 4px;
+border-radius: 3px;
+}
+
+pre {
+font-family: 'Courier New', monospace;
+background-color: #f5f5f5;
+padding: 1em;
+border-radius: 5px;
+overflow-x: auto;
+margin: 1em 0;
+}
+
+.page-break {
+page-break-before: always;
+}
+
+.figure {
+text-align: center;
+margin: 1em 0;
+}
+
+.figure-caption {
+font-weight: bold;
+text-align: center;
+margin-top: 0.5em;
+font-size: 11pt;
+font-style: italic;
+}
+
+hr {
+border: none;
+border-top: 1px solid #000000;
+margin: 2em 0;
+}
+
+strong {
+font-weight: bold;
+}
+
+em {
+font-style: italic;
+}
+
+.declaration {
+margin: 2em 0;
+padding: 1em;
+border: 1px solid #000000;
+}
+
+.abstract {
+margin: 1em 0;
+padding: 1em;
+background-color: #f9f9f9;
+border-left: 4px solid #4CAF50;
+}
+
+.acronyms {
+margin: 1em 0;
+padding: 1em;
+background-color: #f0f8ff;
+border-left: 4px solid #2196F3;
+}
+
+.toc {
+margin: 1em 0;
+padding: 1em;
+background-color: #fff8e1;
+border-left: 4px solid #ff9800;
+}
+</style>
+
+**AUGMENTED REALITY SYSTEM FOR MAKEUP TRY-ON**
 
 **NAME: KITUR CHELIMO MERCY**
 
@@ -6,9 +176,9 @@
 
 **Supervisor: Dr. Charles Wamuti**
 
-_A proposal/ research project submitted to the Department of Information Technology in the School of Computing and Information Technology in partial fulfillment of the requirement for the award of the degree of in Information Technology at Jomo Kenyatta University of Agriculture and Technology_.
+_A proposal/research project submitted to the Department of Information Technology in the School of Computing and Information Technology in partial fulfillment of the requirement for the award of the degree of Bachelor of Science in Information Technology at Jomo Kenyatta University of Agriculture and Technology_.
 
-**Date: 16/04/2025**
+**Date: 16th April, 2025**
 
 # DECLARATION
 
@@ -26,7 +196,7 @@ Signature Date
 
 ## ABSTRACT
 
-The Traditional makeup trial process by JoannaK cosmetics has made it difficult for consumers to purchase products that they desire or matching their taste, this poses so many challenges. Some of this challenges are hygiene concerns for shared testers, limited accessibility since not all consumers have access to physical stores and also most customers feel like having to visit a physical store is time wasting. To address the stated challenges this project proposes an AR system to virtually try on makeup products at the comfort of your home. This system will leverage advanced facial recognition, computer vision, and real-time rendering, enhancing accuracy using AI and ML technologies to allow users to virtually try-on JoannaK products e.g. Wide range of lipstick shades available in the store. User testing will be conducted to assess usability, accuracy, and overall satisfaction. The app will also feature a responsive user interface and be optimized for performance on mobile devices. By enabling virtual try-ons, the system aims to increase purchase confidence, boost online conversion rates, and reduce product return rates. This project aims at making JoannaK products/services accessible to all consumers broadening their market.
+The traditional makeup trial process by JoannaK cosmetics has made it difficult for consumers to purchase products that they desire or matching their taste, this poses so many challenges. Some of these challenges are hygiene concerns for shared testers, limited accessibility since not all consumers have access to physical stores and also most customers feel like having to visit a physical store is time wasting. To address the stated challenges this project proposes an AR system to virtually try on makeup products at the comfort of your home. This system will leverage advanced facial recognition, computer vision, and real-time rendering, enhancing accuracy using AI and ML technologies to allow users to virtually try-on JoannaK products e.g. Wide range of lipstick shades available in the store. User testing will be conducted to assess usability, accuracy, and overall satisfaction. The app will also feature a responsive user interface and be optimized for performance on mobile devices. By enabling virtual try-ons, the system aims to increase purchase confidence, boost online conversion rates, and reduce product return rates. This project aims at making JoannaK products/services accessible to all consumers broadening their market.
 
 ## ACRONYMS
 
@@ -82,7 +252,7 @@ Table of Contents
 
 [CHAPTER 2 13](#_Toc195662813)
 
-[LITERARURE REVIEW 14](#_Toc195662814)
+[LITERATURE REVIEW 14](#_Toc195662814)
 
 [2.1 Introduction 14](#_Toc195662815)
 
@@ -96,7 +266,7 @@ Table of Contents
 
 [**2.2.3: Real-time Rendering:** 15](#_Toc195662820)
 
-[**2.2.4: Marker-based vs. Marker less AR:** 15](#_Toc195662821)
+[**2.2.4: Marker-based vs. Markerless AR:** 15](#_Toc195662821)
 
 [2.3 Case Study Review 16](#_Toc195662822)
 
