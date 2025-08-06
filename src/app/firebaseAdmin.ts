@@ -1,5 +1,4 @@
 import * as admin from "firebase-admin";
-import serviceAccount from "../secret/firebase-service-account.json";
 
 let firebaseApp: admin.app.App | null = null;
 
@@ -13,10 +12,21 @@ export function getFirebaseAdmin() {
 				console.log("Using existing Firebase Admin app");
 			} else {
 				console.log("Initializing Firebase Admin...");
+				
+				// Use environment variables instead of JSON file
+				const serviceAccount = {
+					projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+					clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+					privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+				};
+
+				// Validate required environment variables
+				if (!serviceAccount.projectId || !serviceAccount.clientEmail || !serviceAccount.privateKey) {
+					throw new Error("Missing required Firebase Admin environment variables");
+				}
+
 				firebaseApp = admin.initializeApp({
-					credential: admin.credential.cert(
-						serviceAccount as admin.ServiceAccount
-					),
+					credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
 				});
 				console.log("Firebase Admin initialized successfully");
 			}
