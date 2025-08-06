@@ -1,198 +1,196 @@
-import * as functions from "firebase-functions";
-import * as admin from "firebase-admin";
+import { scheduler, firestore, https } from "firebase-functions/v2";
+import { initializeApp } from "firebase-admin/app";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import * as nodemailer from "nodemailer";
 
 // Initialize Firebase Admin
-admin.initializeApp();
+initializeApp();
 
 // Email configuration
 const emailConfig = {
-  host: process.env.EMAIL_HOST || "smtp.gmail.com",
-  port: parseInt(process.env.EMAIL_PORT || "587"),
-  secure: process.env.EMAIL_SECURE === "true",
-  auth: {
-    user: process.env.EMAIL_USER || "",
-    pass: process.env.EMAIL_PASS || "",
-  },
+	host: process.env.EMAIL_HOST || "smtp.gmail.com",
+	port: parseInt(process.env.EMAIL_PORT || "587"),
+	secure: process.env.EMAIL_SECURE === "true",
+	auth: {
+		user: process.env.EMAIL_USER || "",
+		pass: process.env.EMAIL_PASS || "",
+	},
 };
 
 // Create transporter
 const transporter = nodemailer.createTransport(emailConfig);
 
 // Cloud Function to process email queue
-export const processEmailQueue = functions.pubsub
-  .schedule("every 1 minutes")
-  .onRun(async (context) => {
-    const db = admin.firestore();
-    
-    try {
-      // Get pending emails
-      const pendingEmails = await db
-        .collection("emailQueue")
-        .where("status", "==", "pending")
-        .where("attempts", "<", "maxAttempts")
-        .limit(10) // Process 10 emails at a time
-        .get();
+export const processEmailQueue = scheduler.onSchedule(
+	"every 1 minutes",
+	async (event) => {
+		const db = getFirestore();
 
-      if (pendingEmails.empty) {
-        console.log("No pending emails to process");
-        return null;
-      }
+		try {
+			// Get pending emails
+			const pendingEmails = await db
+				.collection("emailQueue")
+				.where("status", "==", "pending")
+				.where("attempts", "<", "maxAttempts")
+				.limit(10) // Process 10 emails at a time
+				.get();
 
-      const batch = db.batch();
-      const promises: Promise<any>[] = [];
+			if (pendingEmails.empty) {
+				console.log("No pending emails to process");
+				return;
+			}
 
-      pendingEmails.forEach((doc) => {
-        const emailData = doc.data();
-        
-        // Update attempt count
-        batch.update(doc.ref, {
-          attempts: admin.firestore.FieldValue.increment(1),
-          lastAttempt: new Date().toISOString(),
-        });
+			const batch = db.batch();
+			const promises: Promise<any>[] = [];
 
-        // Send email
-        const sendPromise = sendEmail(emailData)
-          .then((success) => {
-            if (success) {
-              batch.update(doc.ref, {
-                status: "sent",
-                sentAt: new Date().toISOString(),
-              });
-            } else {
-              batch.update(doc.ref, {
-                status: "failed",
-                failedAt: new Date().toISOString(),
-              });
-            }
-          })
-          .catch((error) => {
-            console.error(`Failed to send email ${doc.id}:`, error);
-            batch.update(doc.ref, {
-              status: "failed",
-              failedAt: new Date().toISOString(),
-              error: error.message,
-            });
-          });
+			pendingEmails.forEach((doc) => {
+				const emailData = doc.data();
 
-        promises.push(sendPromise);
-      });
+				// Update attempt count
+				batch.update(doc.ref, {
+					attempts: FieldValue.increment(1),
+					lastAttempt: new Date().toISOString(),
+				});
 
-      // Wait for all emails to be processed
-      await Promise.all(promises);
-      
-      // Commit all updates
-      await batch.commit();
-      
-      console.log(`Processed ${pendingEmails.size} emails`);
-      return null;
-    } catch (error) {
-      console.error("Error processing email queue:", error);
-      return null;
-    }
-  });
+				// Send email
+				const sendPromise = sendEmail(emailData)
+					.then((success) => {
+						if (success) {
+							batch.update(doc.ref, {
+								status: "sent",
+								sentAt: new Date().toISOString(),
+							});
+						} else {
+							batch.update(doc.ref, {
+								status: "failed",
+								failedAt: new Date().toISOString(),
+							});
+						}
+					})
+					.catch((error) => {
+						console.error(`Failed to send email ${doc.id}:`, error);
+						batch.update(doc.ref, {
+							status: "failed",
+							failedAt: new Date().toISOString(),
+							error: error.message,
+						});
+					});
+
+				promises.push(sendPromise);
+			});
+
+			// Wait for all emails to be processed
+			await Promise.all(promises);
+
+			// Commit all updates
+			await batch.commit();
+
+			console.log(`Processed ${pendingEmails.size} emails`);
+		} catch (error) {
+			console.error("Error processing email queue:", error);
+		}
+	}
+);
 
 // Cloud Function triggered when new email is added to queue
-export const onEmailQueued = functions.firestore
-  .document("emailQueue/{emailId}")
-  .onCreate(async (snap, context) => {
-    const emailData = snap.data();
-    
-    try {
-      const success = await sendEmail(emailData);
-      
-      if (success) {
-        await snap.ref.update({
-          status: "sent",
-          sentAt: new Date().toISOString(),
-        });
-      } else {
-        await snap.ref.update({
-          status: "failed",
-          failedAt: new Date().toISOString(),
-        });
-      }
-    } catch (error) {
-      console.error("Error sending email:", error);
-      await snap.ref.update({
-        status: "failed",
-        failedAt: new Date().toISOString(),
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-  });
+export const onEmailQueued = firestore.onDocumentCreated(
+	"emailQueue/{emailId}",
+	async (event) => {
+		const emailData = event.data?.data();
+
+		if (!emailData) {
+			console.log("No data found in document");
+			return;
+		}
+
+		try {
+			const success = await sendEmail(emailData);
+
+			if (success) {
+				await event.data?.ref.update({
+					status: "sent",
+					sentAt: new Date().toISOString(),
+				});
+			} else {
+				await event.data?.ref.update({
+					status: "failed",
+					failedAt: new Date().toISOString(),
+				});
+			}
+		} catch (error) {
+			console.error("Error sending email:", error);
+			await event.data?.ref.update({
+				status: "failed",
+				failedAt: new Date().toISOString(),
+				error: error instanceof Error ? error.message : String(error),
+			});
+		}
+	}
+);
 
 // Helper function to send email
 async function sendEmail(emailData: any): Promise<boolean> {
-  try {
-    if (!emailConfig.auth.user || !emailConfig.auth.pass) {
-      console.log("Email configuration not set up");
-      return false;
-    }
+	try {
+		if (!emailConfig.auth.user || !emailConfig.auth.pass) {
+			console.log("Email configuration not set up");
+			return false;
+		}
 
-    const mailOptions = {
-      from: emailData.from || process.env.EMAIL_FROM || emailConfig.auth.user,
-      to: emailData.to,
-      subject: emailData.subject,
-      html: emailData.html,
-    };
+		const mailOptions = {
+			from: emailData.from || process.env.EMAIL_FROM || emailConfig.auth.user,
+			to: emailData.to,
+			subject: emailData.subject,
+			html: emailData.html,
+		};
 
-    await transporter.sendMail(mailOptions);
-    console.log(`Email sent successfully to ${emailData.to}`);
-    return true;
-  } catch (error) {
-    console.error("Failed to send email:", error);
-    return false;
-  }
+		await transporter.sendMail(mailOptions);
+		console.log(`Email sent successfully to ${emailData.to}`);
+		return true;
+	} catch (error) {
+		console.error("Failed to send email:", error);
+		return false;
+	}
 }
 
 // Cloud Function to send verification code directly (alternative approach)
-export const sendVerificationCode = functions.https.onCall(
-  async (data, context) => {
-    // Verify the request is authenticated
-    if (!context.auth) {
-      throw new functions.https.HttpsError(
-        "unauthenticated",
-        "User must be authenticated"
-      );
-    }
+export const sendVerificationCode = https.onCall(async (request) => {
+	// Verify the request is authenticated
+	if (!request.auth) {
+		throw new https.HttpsError("unauthenticated", "User must be authenticated");
+	}
 
-    const { email, code, type } = data;
+	const { email, code, type } = request.data;
 
-    if (!email || !code || !type) {
-      throw new functions.https.HttpsError(
-        "invalid-argument",
-        "Email, code, and type are required"
-      );
-    }
+	if (!email || !code || !type) {
+		throw new https.HttpsError(
+			"invalid-argument",
+			"Email, code, and type are required"
+		);
+	}
 
-    try {
-      const success = await sendEmail({
-        to: email,
-        subject: `${
-          type === "login" ? "Login" : "Registration"
-        } Verification Code - Joanna K Cosmetics`,
-        html: generateVerificationEmailHTML(email, code, type),
-      });
+	try {
+		const success = await sendEmail({
+			to: email,
+			subject: `${
+				type === "login" ? "Login" : "Registration"
+			} Verification Code - Joanna K Cosmetics`,
+			html: generateVerificationEmailHTML(email, code, type),
+		});
 
-      return { success };
-    } catch (error) {
-      console.error("Error sending verification code:", error);
-      throw new functions.https.HttpsError(
-        "internal",
-        "Failed to send verification code"
-      );
-    }
-  }
-);
+		return { success };
+	} catch (error) {
+		console.error("Error sending verification code:", error);
+		throw new https.HttpsError("internal", "Failed to send verification code");
+	}
+});
 
 // Helper function to generate verification email HTML
 function generateVerificationEmailHTML(
-  email: string,
-  code: string,
-  type: string
+	email: string,
+	code: string,
+	type: string
 ): string {
-  return `
+	return `
     <!DOCTYPE html>
     <html>
     <head>
@@ -284,4 +282,4 @@ function generateVerificationEmailHTML(
     </body>
     </html>
   `;
-} 
+}

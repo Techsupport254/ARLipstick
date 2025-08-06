@@ -12,7 +12,7 @@ export function getFirebaseAdmin() {
 				console.log("Using existing Firebase Admin app");
 			} else {
 				console.log("Initializing Firebase Admin...");
-				
+
 				// Use environment variables instead of JSON file
 				const serviceAccount = {
 					projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
@@ -21,12 +21,20 @@ export function getFirebaseAdmin() {
 				};
 
 				// Validate required environment variables
-				if (!serviceAccount.projectId || !serviceAccount.clientEmail || !serviceAccount.privateKey) {
-					throw new Error("Missing required Firebase Admin environment variables");
+				if (
+					!serviceAccount.projectId ||
+					!serviceAccount.clientEmail ||
+					!serviceAccount.privateKey
+				) {
+					throw new Error(
+						"Missing required Firebase Admin environment variables"
+					);
 				}
 
 				firebaseApp = admin.initializeApp({
-					credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+					credential: admin.credential.cert(
+						serviceAccount as admin.ServiceAccount
+					),
 				});
 				console.log("Firebase Admin initialized successfully");
 			}
