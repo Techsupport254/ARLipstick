@@ -130,7 +130,10 @@ function hsvToRgb(h: number, s: number, v: number): [number, number, number] {
 // --- End RGB <-> HSV utilities ---
 
 export function hexToHSL(hex: string) {
+	// Remove the # if present
 	hex = hex.replace("#", "");
+
+	// Parse the hex values
 	let r = 0,
 		g = 0,
 		b = 0;
@@ -143,17 +146,25 @@ export function hexToHSL(hex: string) {
 		g = parseInt(hex.substring(2, 4), 16);
 		b = parseInt(hex.substring(4, 6), 16);
 	}
+
+	// Normalize RGB values to 0-1
 	r /= 255;
 	g /= 255;
 	b /= 255;
-	const max = Math.max(r, g, b),
-		min = Math.min(r, g, b);
+
+	// Find the maximum and minimum values
+	const max = Math.max(r, g, b);
+	const min = Math.min(r, g, b);
 	let h = 0,
 		s = 0;
 	const l = (max + min) / 2;
+
+	// Calculate saturation
 	if (max !== min) {
 		const d = max - min;
 		s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+		// Calculate hue
 		switch (max) {
 			case r:
 				h = (g - b) / d + (g < b ? 6 : 0);
@@ -167,6 +178,7 @@ export function hexToHSL(hex: string) {
 		}
 		h /= 6;
 	}
+
 	return {
 		h: Math.round(h * 360),
 		s: Math.round(s * 100),
@@ -175,14 +187,20 @@ export function hexToHSL(hex: string) {
 }
 
 export function hslToHex(h: number, s: number, l: number) {
+	// Normalize HSL values
 	s /= 100;
 	l /= 100;
+
+	// Calculate chroma
 	const c = (1 - Math.abs(2 * l - 1)) * s;
 	const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
 	const m = l - c / 2;
+
 	let r = 0,
 		g = 0,
 		b = 0;
+
+	// Convert to RGB based on hue
 	if (0 <= h && h < 60) {
 		r = c;
 		g = x;
@@ -208,10 +226,15 @@ export function hslToHex(h: number, s: number, l: number) {
 		g = 0;
 		b = x;
 	}
+
+	// Convert to 0-255 range and to hex
 	r = Math.round((r + m) * 255);
 	g = Math.round((g + m) * 255);
 	b = Math.round((b + m) * 255);
-	return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");
+
+	// Convert to hex string
+	const toHex = (n: number) => n.toString(16).padStart(2, "0");
+	return "#" + toHex(r) + toHex(g) + toHex(b);
 }
 
 export function renderLipstick(
@@ -232,6 +255,9 @@ export function renderLipstick(
 	}
 	const mainCanvas = canvasRef.current;
 	const ctx = mainCanvas.getContext("2d", { willReadFrequently: true });
+	if (!ctx) return;
+
+	// Smooth landmarks
 	prevLandmarks.forEach((landmark, idx) => {
 		landmark.x = lerp(landmark.x, targetLandmarks[idx].x, SMOOTHING);
 		landmark.y = lerp(landmark.y, targetLandmarks[idx].y, SMOOTHING);
@@ -287,20 +313,24 @@ export function renderLipstick(
 		return result;
 	}
 
+	// Create mask canvas
 	const maskCanvas = document.createElement("canvas");
 	maskCanvas.width = mainCanvas.width;
 	maskCanvas.height = mainCanvas.height;
 	const maskCtx = maskCanvas.getContext("2d", { willReadFrequently: true });
-	maskCtx!.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+	if (!maskCtx) return;
 
-	// Before drawing the mask, adjust the lip corners for a sharper, more natural look
+	maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+
+	// Adjust keypoints for better lip detection
 	const adjustedKeypoints = keypoints.map((kp) => ({
-		x: kp.x, // NO MIRRORING
+		x: kp.x,
 		y: kp.y,
 	}));
+
 	// Reduce the offsets for more natural corners
-	const cornerOffset = 1; // was 10
-	const upOffset = 0; // was 4
+	const cornerOffset = 1;
+	const upOffset = 0;
 	if (adjustedKeypoints[61]) {
 		adjustedKeypoints[61].x -= cornerOffset;
 		adjustedKeypoints[61].y -= upOffset;
@@ -309,91 +339,96 @@ export function renderLipstick(
 		adjustedKeypoints[291].x += cornerOffset;
 		adjustedKeypoints[291].y -= upOffset;
 	}
+
 	// Get dense, smooth outer and inner lip contours
 	const outerPoints = denseOuterLip.map((idx) => adjustedKeypoints[idx]);
 	const innerPoints = denseInnerLip.map((idx) => adjustedKeypoints[idx]);
 	const smoothOuter = catmullRomSpline(outerPoints, 60);
 	const smoothInner = catmullRomSpline(innerPoints, 60);
-	// Draw outer lip polygon (with true V-shaped corners)
-	maskCtx!.save();
-	maskCtx!.beginPath();
+
+	// Draw lip mask
+	maskCtx.save();
+	maskCtx.beginPath();
+
 	// Trace outer contour
 	for (let j = 0; j < smoothOuter.length; j++) {
 		const kp = smoothOuter[j];
 		if (j === 0) {
-			maskCtx!.moveTo(kp.x, kp.y);
+			maskCtx.moveTo(kp.x, kp.y);
 		} else {
-			maskCtx!.lineTo(kp.x, kp.y);
+			maskCtx.lineTo(kp.x, kp.y);
 		}
 	}
+
 	// At the right corner, jump to the corresponding inner point (sharp V)
 	const rightInner = smoothInner[smoothInner.length - 1];
-	maskCtx!.lineTo(rightInner.x, rightInner.y);
+	maskCtx.lineTo(rightInner.x, rightInner.y);
+
 	// Trace inner contour in reverse
 	for (let j = smoothInner.length - 2; j >= 0; j--) {
 		const kp = smoothInner[j];
-		maskCtx!.lineTo(kp.x, kp.y);
+		maskCtx.lineTo(kp.x, kp.y);
 	}
+
 	// At the left corner, close the V
 	const leftOuter = smoothOuter[0];
-	maskCtx!.lineTo(leftOuter.x, leftOuter.y);
-	maskCtx!.closePath();
-	maskCtx!.fillStyle = "#fff";
-	maskCtx!.shadowColor = "#fff";
-	maskCtx!.shadowBlur = 6; // Feather only the edge
-	maskCtx!.globalAlpha = 0.85;
-	maskCtx!.fill("evenodd");
-	maskCtx!.restore();
+	maskCtx.lineTo(leftOuter.x, leftOuter.y);
+	maskCtx.closePath();
 
+	maskCtx.fillStyle = "#fff";
+	maskCtx.shadowColor = "#fff";
+	maskCtx.shadowBlur = 6;
+	maskCtx.globalAlpha = 0.85;
+	maskCtx.fill("evenodd");
+	maskCtx.restore();
+
+	// Create feathered mask
 	const featheredMaskCanvas = document.createElement("canvas");
 	featheredMaskCanvas.width = maskCanvas.width;
 	featheredMaskCanvas.height = maskCanvas.height;
 	const featheredMaskCtx = featheredMaskCanvas.getContext("2d", {
 		willReadFrequently: true,
 	});
-	featheredMaskCtx!.drawImage(maskCanvas, 0, 0);
-	featheredMaskCtx!.globalCompositeOperation = "source-in";
-	featheredMaskCtx!.filter = "blur(4px)"; // was blur(2px)
-	featheredMaskCtx!.drawImage(maskCanvas, 0, 0);
-	featheredMaskCtx!.filter = "none";
-	featheredMaskCtx!.globalAlpha = 0.85;
-	featheredMaskCtx!.globalCompositeOperation = "source-in";
-	featheredMaskCtx!.fillStyle = lipColor;
-	featheredMaskCtx!.fillRect(
+	if (!featheredMaskCtx) return;
+
+	featheredMaskCtx.drawImage(maskCanvas, 0, 0);
+	featheredMaskCtx.globalCompositeOperation = "source-in";
+	featheredMaskCtx.filter = "blur(4px)";
+	featheredMaskCtx.drawImage(maskCanvas, 0, 0);
+	featheredMaskCtx.filter = "none";
+	featheredMaskCtx.globalAlpha = 0.85;
+	featheredMaskCtx.globalCompositeOperation = "source-in";
+	featheredMaskCtx.fillStyle = lipColor;
+	featheredMaskCtx.fillRect(
 		0,
 		0,
 		featheredMaskCanvas.width,
 		featheredMaskCanvas.height
 	);
-	featheredMaskCtx!.globalAlpha = 1.0;
-	featheredMaskCtx!.globalCompositeOperation = "source-over";
+	featheredMaskCtx.globalAlpha = 1.0;
+	featheredMaskCtx.globalCompositeOperation = "source-over";
 
-	// Use multiply blend mode for realism
-	ctx!.globalAlpha = 1.0;
-	ctx!.globalCompositeOperation = "multiply";
-	ctx!.drawImage(featheredMaskCanvas, 0, 0);
-	// Remove double overlay and mirroring issue
-	// (Do not draw mainCanvas back onto itself)
-	ctx!.restore(); // Restore after mirroring
+	// Clear main canvas and draw video frame
+	ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
 
-	// --- After mask creation, before drawing to main canvas ---
-	// Instead of filling with solid color, do texture-preserving HSV blending
-	ctx!.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
-	ctx!.save();
-	// Ensure no canvas mirroring
-	// ctx!.setTransform(-1, 0, 0, 1, mainCanvas.width, 0);
-	// Draw the current video frame to the canvas (for pixel access)
-	const video = document.querySelector("video");
-	if (!video) return;
-	ctx!.drawImage(video, 0, 0, mainCanvas.width, mainCanvas.height);
-	const frame = ctx!.getImageData(0, 0, mainCanvas.width, mainCanvas.height);
-	// Prepare mask alpha
-	const maskData = maskCtx!.getImageData(
+	// Draw the current video frame to the canvas
+	const video = document.querySelector("video") as HTMLVideoElement;
+	if (!video || video.readyState !== 4) {
+		// If video is not ready, just return without rendering
+		return;
+	}
+
+	ctx.drawImage(video, 0, 0, mainCanvas.width, mainCanvas.height);
+
+	// Get frame data for pixel manipulation
+	const frame = ctx.getImageData(0, 0, mainCanvas.width, mainCanvas.height);
+	const maskData = maskCtx.getImageData(
 		0,
 		0,
 		mainCanvas.width,
 		mainCanvas.height
 	);
+
 	// Parse lipColor to HSV
 	const hex = lipColor.replace("#", "");
 	const r = parseInt(hex.substring(0, 2), 16);
@@ -401,8 +436,8 @@ export function renderLipstick(
 	const b = parseInt(hex.substring(4, 6), 16);
 	const [targetH, targetS, targetV0] = rgbToHsv(r, g, b);
 	let targetV = targetV0;
-	// --- Dynamic lighting adaptation ---
-	// Estimate average brightness in lip region
+
+	// Dynamic lighting adaptation
 	let sumV = 0,
 		count = 0;
 	for (let j = 0; j < maskData.data.length; j += 4) {
@@ -418,9 +453,9 @@ export function renderLipstick(
 		}
 	}
 	const avgV = count > 0 ? sumV / count : 0.5;
-	// Adjust lipstick V to match lighting (keep it a bit higher for vibrancy)
 	targetV = Math.max(0.15, Math.min(1, avgV + 0.15));
-	// --- Texture-preserving blending ---
+
+	// Texture-preserving blending
 	for (let j = 0; j < maskData.data.length; j += 4) {
 		const alpha = maskData.data[j + 3] / 255;
 		if (alpha > 0.05) {
@@ -430,19 +465,23 @@ export function renderLipstick(
 				frame.data[j + 1],
 				frame.data[j + 2]
 			);
+
 			// Blend hue/sat, preserve value (texture)
-			const newH = targetH * 0.85 + origH * 0.15; // blend in some original hue
-			const newS = Math.max(origS, targetS * 0.85); // keep more natural color
+			const newH = targetH * 0.85 + origH * 0.15;
+			const newS = Math.max(origS, targetS * 0.85);
 			let newV = v * (1 - alpha) + targetV * alpha;
-			// For matte, reduce gloss (lower V slightly)
+
+			// For matte, reduce gloss
 			if (finish === "matte") newV *= 0.97;
+
 			// For gloss, add highlight
 			if (finish === "gloss" && v > 0.85 && origS < 0.3) {
-				newV = Math.min(1, newV + 0.1); // slightly stronger highlight
+				newV = Math.min(1, newV + 0.1);
 			}
+
 			const [nr, ng, nb] = hsvToRgb(newH, newS, newV);
-			// Feathered alpha
 			const featherAlpha = Math.min(1, alpha * 1.1);
+
 			frame.data[j] = Math.round(
 				nr * featherAlpha + frame.data[j] * (1 - featherAlpha)
 			);
@@ -452,30 +491,32 @@ export function renderLipstick(
 			frame.data[j + 2] = Math.round(
 				nb * featherAlpha + frame.data[j + 2] * (1 - featherAlpha)
 			);
-			// Alpha stays 255
 		}
 	}
-	ctx!.putImageData(frame, 0, 0);
-	ctx!.restore();
+
+	ctx.putImageData(frame, 0, 0);
+
 	// Enhanced gloss highlight for 'gloss' finish
 	if (finish === "gloss") {
-		ctx!.save();
-		ctx!.globalAlpha = 0.22; // slightly stronger
-		ctx!.globalCompositeOperation = "lighter";
-		ctx!.beginPath();
-		// Draw a highlight arc along the upper lip, more pronounced
+		ctx.save();
+		ctx.globalAlpha = 0.22;
+		ctx.globalCompositeOperation = "lighter";
+		ctx.beginPath();
+
+		// Draw a highlight arc along the upper lip
 		const highlight = smoothOuter.slice(10, 30);
 		for (let k = 0; k < highlight.length; k++) {
 			const kp = highlight[k];
-			if (k === 0) ctx!.moveTo(kp.x, kp.y - 5); // higher arc
-			else ctx!.lineTo(kp.x, kp.y - 5);
+			if (k === 0) ctx.moveTo(kp.x, kp.y - 5);
+			else ctx.lineTo(kp.x, kp.y - 5);
 		}
-		ctx!.lineWidth = 8; // thicker
-		ctx!.strokeStyle = "#fff";
-		ctx!.shadowColor = "#fff";
-		ctx!.shadowBlur = 12; // more blur
-		ctx!.stroke();
-		ctx!.restore();
+
+		ctx.lineWidth = 8;
+		ctx.strokeStyle = "#fff";
+		ctx.shadowColor = "#fff";
+		ctx.shadowBlur = 12;
+		ctx.stroke();
+		ctx.restore();
 	}
 }
 

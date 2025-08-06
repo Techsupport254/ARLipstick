@@ -4,13 +4,19 @@ import { useState } from "react";
 import { addToCart } from "../utils/cart";
 
 export type Product = {
-	id: string;
+	productId: string;
 	name: string;
 	price: number;
 	oldPrice?: number;
 	imageUrl: string;
 	description?: string;
 	stock?: number;
+	colorName?: string;
+	hexColor?: string;
+	finish?: string;
+	category?: string;
+	createdAt?: string;
+	updatedAt?: string;
 };
 
 type ProductGridProps = {
@@ -54,7 +60,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
 				const soldOut = product.stock === 0;
 				return (
 					<div
-						key={product.id}
+						key={product.productId}
 						className={`relative bg-white/80 rounded-3xl shadow-2xl p-3 xs:p-4 sm:p-6 md:p-8 flex flex-col items-center border border-pink-100 hover:shadow-pink-300 hover:scale-[1.03] transition-all duration-200 group overflow-hidden min-h-[380px] xs:min-h-[400px] sm:min-h-[420px] max-w-full xs:max-w-xs mx-auto w-full backdrop-blur-md ${
 							soldOut ? "opacity-70" : ""
 						}`}
@@ -113,20 +119,20 @@ export default function ProductGrid({ products }: ProductGridProps) {
 						</div>
 						<div className="flex flex-col gap-2 xs:gap-3 w-full mt-auto">
 							<a
-								href={`/virtual-tryon?id=${product.id}`}
+								href={`/virtual-tryon?id=${product.productId}`}
 								className="px-4 xs:px-6 py-2 xs:py-3 bg-gradient-to-r from-pink-500 to-pink-400 text-white rounded-full shadow hover:from-pink-600 hover:to-pink-500 transition font-semibold text-base xs:text-lg w-full text-center flex items-center justify-center gap-2"
 							>
 								<span>Try in AR</span>
 							</a>
-							{cartMessages[product.id] && (
+							{cartMessages[product.productId] && (
 								<div
 									className={`font-semibold mb-2 text-center ${
-										cartMessages[product.id] === "Added to cart!"
+										cartMessages[product.productId] === "Added to cart!"
 											? "text-green-600"
 											: "text-red-600"
 									}`}
 								>
-									{cartMessages[product.id]}
+									{cartMessages[product.productId]}
 								</div>
 							)}
 							<button
@@ -137,7 +143,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
 								}`}
 								type="button"
 								disabled={soldOut}
-								onClick={() => handleAddToCart(product.id)}
+								onClick={() => handleAddToCart(product.productId)}
 							>
 								<span>Add to Cart</span>
 							</button>

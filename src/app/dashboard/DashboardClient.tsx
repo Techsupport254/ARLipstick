@@ -35,11 +35,7 @@ import {
 	ResponsiveContainer,
 } from "recharts";
 import Image from "next/image";
-
-const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
-	.split(",")
-	.map((e) => e.trim())
-	.filter(Boolean);
+import UserAvatar from "../components/UserAvatar";
 
 function formatKES(value: any) {
 	if (typeof value !== "number") return value;
@@ -93,14 +89,19 @@ export default function DashboardClient() {
 				});
 				let dataProfile = await resProfile.json();
 				if (Array.isArray(dataProfile)) {
+					// If it's an array (admin), find the current user
 					dataProfile =
 						(dataProfile as Array<Record<string, unknown>>).find(
-							(u) => u.uid === firebaseUser.uid
+							(u) => (u.uid || u.userId) === firebaseUser.uid
 						) || dataProfile[0];
 				}
+				// If it's not an array, it's already the user profile
 
 				setUserProfile(dataProfile);
-				const userIsAdmin = ADMIN_EMAILS.includes(dataProfile.email as string);
+				const userIsAdmin = dataProfile.roleId === "admin";
+				console.log("Dashboard: User profile:", dataProfile);
+				console.log("Dashboard: roleId:", dataProfile.roleId);
+				console.log("Dashboard: userIsAdmin:", userIsAdmin);
 				setIsAdmin(userIsAdmin);
 
 				// Fetch orders
@@ -195,66 +196,80 @@ export default function DashboardClient() {
 		const recentOrders = userStats.recentOrders || [];
 		const recentPayments = userStats.recentPayments || [];
 		const monthlySpending = userStats.monthlySpending || [];
-		const loyaltyPoints = 120; // Static for now
 
 		return (
-			<main className="flex-1 min-h-screen bg-gradient-to-br from-pink-100 via-rose-50 to-purple-100">
-				<section className="flex-1 p-2 sm:p-4 md:p-6 w-full container max-w-8xl mx-auto">
+			<main className="flex-1 min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50">
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 					{/* User Dashboard Title */}
-					<h1 className="text-3xl sm:text-4xl font-extrabold text-pink-800 mb-4 sm:mb-6 md:mb-8 text-center">
-						My Dashboard
-					</h1>
+					<div className="text-center mb-12">
+						<h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+							Welcome back!
+						</h1>
+						<p className="text-lg text-gray-600 max-w-2xl mx-auto">
+							Track your orders, manage your profile, and discover new lipstick
+							shades
+						</p>
+					</div>
 
 					{/* User Stats Cards */}
-					<div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8 mb-4 sm:mb-6 md:mb-8">
-						<div className="bg-white rounded-2xl shadow-2xl border-2 border-pink-200 p-3 sm:p-4 md:p-6 flex flex-col items-center">
-							<FaBoxOpen className="text-pink-600 text-2xl sm:text-3xl mb-1 sm:mb-2" />
-							<span className="text-base sm:text-lg font-bold text-pink-800">
-								My Orders
-							</span>
-							<span className="text-lg sm:text-2xl text-pink-800 font-extrabold">
-								{orderStats.total ?? 0}
-							</span>
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+						<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+							<div className="flex items-center justify-between">
+								<div>
+									<p className="text-sm font-medium text-gray-600">
+										Total Orders
+									</p>
+									<p className="text-2xl font-bold text-gray-900">
+										{orderStats.total ?? 0}
+									</p>
+								</div>
+								<div className="p-3 bg-pink-100 rounded-lg">
+									<FaBoxOpen className="text-pink-600 text-xl" />
+								</div>
+							</div>
 						</div>
-						<div className="bg-white rounded-2xl shadow-2xl border-2 border-pink-200 p-3 sm:p-4 md:p-6 flex flex-col items-center">
-							<FaCreditCard className="text-pink-600 text-2xl sm:text-3xl mb-1 sm:mb-2" />
-							<span className="text-base sm:text-lg font-bold text-pink-800">
-								Total Spent
-							</span>
-							<span className="text-lg sm:text-2xl text-pink-800 font-extrabold">
-								{(orderStats.totalSpent ?? 0).toLocaleString("en-KE", {
-									style: "currency",
-									currency: "KES",
-								})}
-							</span>
+						<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+							<div className="flex items-center justify-between">
+								<div>
+									<p className="text-sm font-medium text-gray-600">
+										Total Spent
+									</p>
+									<p className="text-2xl font-bold text-gray-900">
+										{(orderStats.totalSpent ?? 0).toLocaleString("en-KE", {
+											style: "currency",
+											currency: "KES",
+										})}
+									</p>
+								</div>
+								<div className="p-3 bg-green-100 rounded-lg">
+									<FaCreditCard className="text-green-600 text-xl" />
+								</div>
+							</div>
 						</div>
-						<div className="bg-white rounded-2xl shadow-2xl border-2 border-pink-200 p-3 sm:p-4 md:p-6 flex flex-col items-center">
-							<FaCreditCard className="text-pink-600 text-2xl sm:text-3xl mb-1 sm:mb-2" />
-							<span className="text-base sm:text-lg font-bold text-pink-800">
-								Payments
-							</span>
-							<span className="text-lg sm:text-2xl text-pink-800 font-extrabold">
-								{paymentStats.total ?? 0}
-							</span>
-						</div>
-						<div className="bg-white rounded-2xl shadow-2xl border-2 border-pink-200 p-3 sm:p-4 md:p-6 flex flex-col items-center">
-							<FaHeart className="text-pink-600 text-2xl sm:text-3xl mb-1 sm:mb-2" />
-							<span className="text-base sm:text-lg font-bold text-pink-800">
-								Loyalty Points
-							</span>
-							<span className="text-lg sm:text-2xl text-pink-800 font-extrabold">
-								{loyaltyPoints}
-							</span>
+						<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+							<div className="flex items-center justify-between">
+								<div>
+									<p className="text-sm font-medium text-gray-600">Payments</p>
+									<p className="text-2xl font-bold text-gray-900">
+										{paymentStats.total ?? 0}
+									</p>
+								</div>
+								<div className="p-3 bg-blue-100 rounded-lg">
+									<FaCreditCard className="text-blue-600 text-xl" />
+								</div>
+							</div>
 						</div>
 					</div>
 
 					{/* Analytics Section */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+					<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
 						{/* Order Status Pie Chart */}
-						<div className="bg-white rounded-2xl shadow-xl border-2 border-pink-200 p-6">
-							<h2 className="text-xl font-bold text-pink-800 mb-6 flex items-center gap-2">
-								<FaChartBar className="text-pink-600" /> Order Status
-								Distribution
+						<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+							<h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+								<div className="p-2 bg-blue-100 rounded-lg">
+									<FaChartBar className="text-blue-600" />
+								</div>
+								Order Status Distribution
 							</h2>
 							{(() => {
 								const completed = orderStats.completed || 0;
@@ -308,9 +323,12 @@ export default function DashboardClient() {
 							})()}
 						</div>
 						{/* Monthly Spending Area Chart */}
-						<div className="bg-white rounded-2xl shadow-xl border-2 border-pink-200 p-6">
-							<h2 className="text-xl font-bold text-pink-800 mb-6 flex items-center gap-2">
-								<FaChartLine className="text-pink-600" /> Monthly Spending Trend
+						<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+							<h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+								<div className="p-2 bg-green-100 rounded-lg">
+									<FaChartLine className="text-green-600" />
+								</div>
+								Monthly Spending Trend
 							</h2>
 							<ResponsiveContainer width="100%" height={250}>
 								<AreaChart data={monthlySpending}>
@@ -335,63 +353,84 @@ export default function DashboardClient() {
 					</div>
 
 					{/* User Quick Actions */}
-					<h2 className="text-xl sm:text-2xl font-bold text-pink-700 mb-2 sm:mb-4">
-						Quick Actions
-					</h2>
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8 md:mb-12">
-						<a
-							href="/shop"
-							className="bg-pink-100 rounded-2xl shadow-xl border-2 border-pink-300 p-4 sm:p-6 md:p-8 flex flex-col items-center hover:shadow-2xl transition"
-						>
-							<FaShoppingCart className="text-pink-600 text-2xl sm:text-4xl mb-2 sm:mb-4" />
-							<span className="text-lg sm:text-xl font-bold text-pink-700 mb-1 sm:mb-2">
-								Shop Now
-							</span>
-							<span className="text-gray-700 text-center text-xs sm:text-sm">
-								Browse our premium lipstick collection.
-							</span>
-						</a>
-						<a
-							href="/virtual-tryon"
-							className="bg-pink-100 rounded-2xl shadow-xl border-2 border-pink-300 p-4 sm:p-6 md:p-8 flex flex-col items-center hover:shadow-2xl transition"
-						>
-							<FaUser className="text-pink-600 text-2xl sm:text-4xl mb-2 sm:mb-4" />
-							<span className="text-lg sm:text-xl font-bold text-pink-700 mb-1 sm:mb-2">
-								Virtual Try-On
-							</span>
-							<span className="text-gray-700 text-center text-xs sm:text-sm">
-								Try on lipsticks virtually with AR.
-							</span>
-						</a>
-						<a
-							href="/dashboard/orders"
-							className="bg-pink-100 rounded-2xl shadow-xl border-2 border-pink-300 p-4 sm:p-6 md:p-8 flex flex-col items-center hover:shadow-2xl transition"
-						>
-							<FaHistory className="text-pink-600 text-2xl sm:text-4xl mb-2 sm:mb-4" />
-							<span className="text-lg sm:text-xl font-bold text-pink-700 mb-1 sm:mb-2">
-								Order History
-							</span>
-							<span className="text-gray-700 text-center text-xs sm:text-sm">
-								View your past orders and track current ones.
-							</span>
-						</a>
-						<a
-							href="/dashboard/profile"
-							className="bg-pink-100 rounded-2xl shadow-xl border-2 border-pink-300 p-4 sm:p-6 md:p-8 flex flex-col items-center hover:shadow-2xl transition"
-						>
-							<FaUser className="text-pink-600 text-2xl sm:text-4xl mb-2 sm:mb-4" />
-							<span className="text-lg sm:text-xl font-bold text-pink-700 mb-1 sm:mb-2">
-								My Profile
-							</span>
-							<span className="text-gray-700 text-center text-xs sm:text-sm">
-								Update your profile and preferences.
-							</span>
-						</a>
+					<div className="mb-12">
+						<h2 className="text-2xl font-bold text-gray-900 mb-6">
+							Quick Actions
+						</h2>
+						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+							<a
+								href="/shop"
+								className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-200 hover:border-pink-200"
+							>
+								<div className="flex flex-col items-center text-center">
+									<div className="p-3 bg-pink-100 rounded-lg mb-4 group-hover:bg-pink-200 transition-colors">
+										<FaShoppingCart className="text-pink-600 text-2xl" />
+									</div>
+									<h3 className="text-lg font-semibold text-gray-900 mb-2">
+										Shop Now
+									</h3>
+									<p className="text-gray-600 text-sm">
+										Browse our premium lipstick collection
+									</p>
+								</div>
+							</a>
+							<a
+								href="/virtual-tryon"
+								className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-200 hover:border-purple-200"
+							>
+								<div className="flex flex-col items-center text-center">
+									<div className="p-3 bg-purple-100 rounded-lg mb-4 group-hover:bg-purple-200 transition-colors">
+										<FaUser className="text-purple-600 text-2xl" />
+									</div>
+									<h3 className="text-lg font-semibold text-gray-900 mb-2">
+										Virtual Try-On
+									</h3>
+									<p className="text-gray-600 text-sm">
+										Try on lipsticks virtually with AR
+									</p>
+								</div>
+							</a>
+							<a
+								href="/dashboard/orders"
+								className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-200 hover:border-blue-200"
+							>
+								<div className="flex flex-col items-center text-center">
+									<div className="p-3 bg-blue-100 rounded-lg mb-4 group-hover:bg-blue-200 transition-colors">
+										<FaHistory className="text-blue-600 text-2xl" />
+									</div>
+									<h3 className="text-lg font-semibold text-gray-900 mb-2">
+										Order History
+									</h3>
+									<p className="text-gray-600 text-sm">
+										View your past orders and track current ones
+									</p>
+								</div>
+							</a>
+							<a
+								href="/dashboard/profile"
+								className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-200 hover:border-green-200"
+							>
+								<div className="flex flex-col items-center text-center">
+									<div className="p-3 bg-green-100 rounded-lg mb-4 group-hover:bg-green-200 transition-colors">
+										<FaUser className="text-green-600 text-2xl" />
+									</div>
+									<h3 className="text-lg font-semibold text-gray-900 mb-2">
+										My Profile
+									</h3>
+									<p className="text-gray-600 text-sm">
+										Update your profile and preferences
+									</p>
+								</div>
+							</a>
+						</div>
 					</div>
 
 					{/* Recent Orders Table */}
-					<div className="bg-white rounded-2xl shadow-2xl border-2 border-pink-200 p-4 sm:p-6 md:p-8 mb-8">
-						<h2 className="text-2xl font-bold text-pink-700 mb-4">
+					<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+						<h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+							<div className="p-2 bg-orange-100 rounded-lg">
+								<FaBoxOpen className="text-orange-600" />
+							</div>
 							Recent Orders
 						</h2>
 						{recentOrders.length > 0 ? (
@@ -496,8 +535,11 @@ export default function DashboardClient() {
 					</div>
 
 					{/* Recent Payments Table */}
-					<div className="bg-white rounded-2xl shadow-2xl border-2 border-pink-200 p-4 sm:p-6 md:p-8">
-						<h2 className="text-2xl font-bold text-pink-700 mb-4">
+					<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+						<h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+							<div className="p-2 bg-green-100 rounded-lg">
+								<FaCreditCard className="text-green-600" />
+							</div>
 							Recent Payments
 						</h2>
 						{recentPayments.length > 0 ? (
@@ -603,7 +645,7 @@ export default function DashboardClient() {
 							</div>
 						)}
 					</div>
-				</section>
+				</div>
 			</main>
 		);
 	}
@@ -611,135 +653,186 @@ export default function DashboardClient() {
 	// Admin Dashboard
 	if (isAdmin) {
 		return (
-			<main className="flex-1 min-h-screen bg-gradient-to-br from-pink-100 via-rose-50 to-purple-100">
-				<section className="flex-1 p-2 sm:p-6 md:p-10 w-full container max-w-8xl mx-auto">
+			<main className="flex-1 min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50">
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 					{/* Dashboard Title */}
-					<h1 className="text-4xl font-extrabold text-pink-800 mb-10 text-center tracking-tight">
-						Admin Dashboard
-					</h1>
+					<div className="text-center mb-12">
+						<h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+							Admin Dashboard
+						</h1>
+						<p className="text-lg text-gray-600 max-w-2xl mx-auto">
+							Monitor sales, manage products, and oversee your beauty business
+						</p>
+					</div>
 
 					{/* Stats Cards */}
-					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-						<div className="bg-white rounded-2xl shadow-xl border-2 border-pink-200 p-6 flex flex-col items-center">
-							<FaUsers className="text-pink-600 text-3xl mb-2" />
-							<span className="text-lg font-semibold text-gray-500 mb-1">
-								Total Users
-							</span>
-							<span className="text-3xl font-extrabold text-pink-700">
-								{stats.totalUsers ?? "-"}
-							</span>
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+						<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+							<div className="flex items-center justify-between">
+								<div>
+									<p className="text-sm font-medium text-gray-600">
+										Total Users
+									</p>
+									<p className="text-2xl font-bold text-gray-900">
+										{stats.totalUsers ?? "-"}
+									</p>
+								</div>
+								<div className="p-3 bg-blue-100 rounded-lg">
+									<FaUsers className="text-blue-600 text-xl" />
+								</div>
+							</div>
 						</div>
-						<div className="bg-white rounded-2xl shadow-xl border-2 border-pink-200 p-6 flex flex-col items-center">
-							<FaBoxOpen className="text-pink-600 text-3xl mb-2" />
-							<span className="text-lg font-semibold text-gray-500 mb-1">
-								Total Orders
-							</span>
-							<span className="text-3xl font-extrabold text-pink-700">
-								{stats.totalOrders ?? "-"}
-							</span>
+						<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+							<div className="flex items-center justify-between">
+								<div>
+									<p className="text-sm font-medium text-gray-600">
+										Total Orders
+									</p>
+									<p className="text-2xl font-bold text-gray-900">
+										{stats.totalOrders ?? "-"}
+									</p>
+								</div>
+								<div className="p-3 bg-orange-100 rounded-lg">
+									<FaBoxOpen className="text-orange-600 text-xl" />
+								</div>
+							</div>
 						</div>
-						<div className="bg-white rounded-2xl shadow-xl border-2 border-pink-200 p-6 flex flex-col items-center">
-							<FaCreditCard className="text-pink-600 text-3xl mb-2" />
-							<span className="text-lg font-semibold text-gray-500 mb-1">
-								Total Sales
-							</span>
-							<span className="text-3xl font-extrabold text-pink-700">
-								{stats.totalSales?.toLocaleString("en-KE", {
-									style: "currency",
-									currency: "KES",
-								}) ?? "-"}
-							</span>
+						<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+							<div className="flex items-center justify-between">
+								<div>
+									<p className="text-sm font-medium text-gray-600">
+										Total Sales
+									</p>
+									<p className="text-2xl font-bold text-gray-900">
+										{stats.totalSales?.toLocaleString("en-KE", {
+											style: "currency",
+											currency: "KES",
+										}) ?? "-"}
+									</p>
+								</div>
+								<div className="p-3 bg-green-100 rounded-lg">
+									<FaCreditCard className="text-green-600 text-xl" />
+								</div>
+							</div>
 						</div>
-						<div className="bg-white rounded-2xl shadow-xl border-2 border-pink-200 p-6 flex flex-col items-center">
-							<FaCheckCircle className="text-pink-600 text-3xl mb-2" />
-							<span className="text-lg font-semibold text-gray-500 mb-1">
-								Pending Orders
-							</span>
-							<span className="text-3xl font-extrabold text-pink-700">
-								{stats.pendingOrders ?? "-"}
-							</span>
+						<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+							<div className="flex items-center justify-between">
+								<div>
+									<p className="text-sm font-medium text-gray-600">
+										Pending Orders
+									</p>
+									<p className="text-2xl font-bold text-gray-900">
+										{stats.pendingOrders ?? "-"}
+									</p>
+								</div>
+								<div className="p-3 bg-yellow-100 rounded-lg">
+									<FaCheckCircle className="text-yellow-600 text-xl" />
+								</div>
+							</div>
 						</div>
 					</div>
 
 					{/* Quick Actions */}
 					<div className="mb-12">
-						<h2 className="text-2xl font-bold text-pink-700 mb-4 flex items-center gap-2">
-							<FaPlus className="text-pink-500" /> Quick Actions
+						<h2 className="text-2xl font-bold text-gray-900 mb-6">
+							Quick Actions
 						</h2>
-						<div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
 							<a
 								href="/dashboard/admin/add-product"
-								className="bg-pink-100 rounded-2xl shadow-xl border-2 border-pink-300 p-4 sm:p-6 md:p-8 flex flex-col items-center hover:shadow-2xl transition"
+								className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-200 hover:border-green-200"
 							>
-								<FaPlus className="text-pink-600 text-2xl sm:text-4xl mb-2 sm:mb-4" />
-								<span className="text-lg sm:text-xl font-bold text-pink-700 mb-1 sm:mb-2">
-									Add Product
-								</span>
-								<span className="text-gray-700 text-center text-xs sm:text-sm">
-									Add new lipstick or beauty products to the shop.
-								</span>
+								<div className="flex flex-col items-center text-center">
+									<div className="p-3 bg-green-100 rounded-lg mb-4 group-hover:bg-green-200 transition-colors">
+										<FaPlus className="text-green-600 text-2xl" />
+									</div>
+									<h3 className="text-lg font-semibold text-gray-900 mb-2">
+										Add Product
+									</h3>
+									<p className="text-gray-600 text-sm">
+										Add new lipstick or beauty products
+									</p>
+								</div>
 							</a>
 							<a
 								href="/dashboard/admin/approve-orders"
-								className="bg-pink-100 rounded-2xl shadow-xl border-2 border-pink-300 p-4 sm:p-6 md:p-8 flex flex-col items-center hover:shadow-2xl transition"
+								className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-200 hover:border-blue-200"
 							>
-								<FaCheckCircle className="text-pink-600 text-2xl sm:text-4xl mb-2 sm:mb-4" />
-								<span className="text-lg sm:text-xl font-bold text-pink-700 mb-1 sm:mb-2">
-									Approve Orders
-								</span>
-								<span className="text-gray-700 text-center text-xs sm:text-sm">
-									Review and approve pending customer orders.
-								</span>
+								<div className="flex flex-col items-center text-center">
+									<div className="p-3 bg-blue-100 rounded-lg mb-4 group-hover:bg-blue-200 transition-colors">
+										<FaCheckCircle className="text-blue-600 text-2xl" />
+									</div>
+									<h3 className="text-lg font-semibold text-gray-900 mb-2">
+										Approve Orders
+									</h3>
+									<p className="text-gray-600 text-sm">
+										Review and approve pending orders
+									</p>
+								</div>
 							</a>
 							<a
 								href="/dashboard/admin/products"
-								className="bg-pink-100 rounded-2xl shadow-xl border-2 border-pink-300 p-4 sm:p-6 md:p-8 flex flex-col items-center hover:shadow-2xl transition"
+								className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-200 hover:border-orange-200"
 							>
-								<FaBoxes className="text-pink-600 text-2xl sm:text-4xl mb-2 sm:mb-4" />
-								<span className="text-lg sm:text-xl font-bold text-pink-700 mb-1 sm:mb-2">
-									Manage Products
-								</span>
-								<span className="text-gray-700 text-center text-xs sm:text-sm">
-									Edit or remove existing products from the shop.
-								</span>
+								<div className="flex flex-col items-center text-center">
+									<div className="p-3 bg-orange-100 rounded-lg mb-4 group-hover:bg-orange-200 transition-colors">
+										<FaBoxes className="text-orange-600 text-2xl" />
+									</div>
+									<h3 className="text-lg font-semibold text-gray-900 mb-2">
+										Manage Products
+									</h3>
+									<p className="text-gray-600 text-sm">
+										Edit or remove existing products
+									</p>
+								</div>
 							</a>
 							<a
 								href="/dashboard/admin/users"
-								className="bg-pink-100 rounded-2xl shadow-xl border-2 border-pink-300 p-4 sm:p-6 md:p-8 flex flex-col items-center hover:shadow-2xl transition"
+								className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-200 hover:border-purple-200"
 							>
-								<FaUsers className="text-pink-600 text-2xl sm:text-4xl mb-2 sm:mb-4" />
-								<span className="text-lg sm:text-xl font-bold text-pink-700 mb-1 sm:mb-2">
-									User Management
-								</span>
-								<span className="text-gray-700 text-center text-xs sm:text-sm">
-									View and manage all users and their roles.
-								</span>
+								<div className="flex flex-col items-center text-center">
+									<div className="p-3 bg-purple-100 rounded-lg mb-4 group-hover:bg-purple-200 transition-colors">
+										<FaUsers className="text-purple-600 text-2xl" />
+									</div>
+									<h3 className="text-lg font-semibold text-gray-900 mb-2">
+										User Management
+									</h3>
+									<p className="text-gray-600 text-sm">
+										View and manage all users
+									</p>
+								</div>
 							</a>
 							<a
 								href="/dashboard/admin/payments"
-								className="bg-pink-100 rounded-2xl shadow-xl border-2 border-pink-300 p-4 sm:p-6 md:p-8 flex flex-col items-center hover:shadow-2xl transition"
+								className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-200 hover:border-green-200"
 							>
-								<FaCreditCard className="text-pink-600 text-2xl sm:text-4xl mb-2 sm:mb-4" />
-								<span className="text-lg sm:text-xl font-bold text-pink-700 mb-1 sm:mb-2">
-									Payments
-								</span>
-								<span className="text-gray-700 text-center text-xs sm:text-sm">
-									View and manage all payments made on the platform.
-								</span>
+								<div className="flex flex-col items-center text-center">
+									<div className="p-3 bg-green-100 rounded-lg mb-4 group-hover:bg-green-200 transition-colors">
+										<FaCreditCard className="text-green-600 text-2xl" />
+									</div>
+									<h3 className="text-lg font-semibold text-gray-900 mb-2">
+										Payments
+									</h3>
+									<p className="text-gray-600 text-sm">
+										View and manage all payments
+									</p>
+								</div>
 							</a>
 						</div>
 					</div>
 
 					{/* Analytics Section */}
 					{comprehensiveStats && (
-						<div className="grid grid-cols-1 xl:grid-cols-2 gap-10 mb-12">
+						<div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-12">
 							{/* Left Column: Performance + Revenue Chart */}
-							<div className="flex flex-col gap-10">
+							<div className="flex flex-col gap-8">
 								{/* Monthly Revenue Trend Chart */}
-								<div className="bg-white rounded-2xl shadow-xl border-2 border-pink-200 p-6">
-									<h2 className="text-xl font-bold text-pink-800 mb-6 flex items-center gap-2">
-										<FaChartLine className="text-pink-600" /> Monthly Revenue
-										Trend
+								<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+									<h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+										<div className="p-2 bg-green-100 rounded-lg">
+											<FaChartLine className="text-green-600" />
+										</div>
+										Monthly Revenue Trend
 									</h2>
 									<ResponsiveContainer width="100%" height={250}>
 										<AreaChart
@@ -767,10 +860,12 @@ export default function DashboardClient() {
 									</ResponsiveContainer>
 								</div>
 								{/* Order Status Pie Chart */}
-								<div className="bg-white rounded-2xl shadow-xl border-2 border-pink-200 p-6">
-									<h2 className="text-xl font-bold text-pink-800 mb-6 flex items-center gap-2">
-										<FaChartBar className="text-pink-600" /> Order Status
-										Distribution
+								<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+									<h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+										<div className="p-2 bg-blue-100 rounded-lg">
+											<FaChartBar className="text-blue-600" />
+										</div>
+										Order Status Distribution
 									</h2>
 									{(() => {
 										const completed =
@@ -829,11 +924,14 @@ export default function DashboardClient() {
 								</div>
 							</div>
 							{/* Right Column: Top Products + Order Status Pie */}
-							<div className="flex flex-col gap-10">
+							<div className="flex flex-col gap-8">
 								{/* Top Products */}
-								<div className="bg-white rounded-2xl shadow-xl border-2 border-pink-200 p-6">
-									<h2 className="text-xl font-bold text-pink-800 mb-6 flex items-center gap-2">
-										<FaTrophy className="text-pink-600" /> Top Products
+								<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+									<h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+										<div className="p-2 bg-yellow-100 rounded-lg">
+											<FaTrophy className="text-yellow-600" />
+										</div>
+										Top Products
 									</h2>
 									<div className="space-y-3">
 										{(comprehensiveStats.topProducts as any[])
@@ -912,9 +1010,12 @@ export default function DashboardClient() {
 						<>
 							{/* Recent Orders Table - full width row */}
 							<div className="mb-8">
-								<div className="bg-white rounded-2xl shadow-xl border-2 border-pink-200 p-6 w-full">
-									<h2 className="text-xl font-bold text-pink-800 mb-4 flex items-center gap-2">
-										<FaClock className="text-pink-600" /> Recent Orders
+								<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 w-full">
+									<h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+										<div className="p-2 bg-orange-100 rounded-lg">
+											<FaClock className="text-orange-600" />
+										</div>
+										Recent Orders
 									</h2>
 									<div className="w-full overflow-x-auto">
 										<Table
@@ -944,15 +1045,11 @@ export default function DashboardClient() {
 													render: (v: any, record: any) => (
 														<span className="flex items-center gap-3">
 															<span className="inline-block w-10 h-10 relative">
-																<Image
-																	src={
-																		record.customerPhotoURL ||
-																		"/ar-lipstick-logo.svg"
-																	}
-																	alt={record.customerName || "Customer"}
-																	width={40}
-																	height={40}
-																	className="rounded-full object-cover border border-pink-200 bg-white"
+																<UserAvatar
+																	photoURL={record.customerPhotoURL}
+																	displayName={record.customerName}
+																	email={record.customerEmail}
+																	size={40}
 																/>
 															</span>
 															<div>
@@ -1104,9 +1201,12 @@ export default function DashboardClient() {
 							{/* Recent Payments and New Users - side by side */}
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
 								{/* Recent Payments */}
-								<div className="bg-white rounded-2xl shadow-xl border-2 border-pink-200 p-6">
-									<h2 className="text-xl font-bold text-pink-800 mb-4 flex items-center gap-2">
-										<FaCreditCard className="text-pink-600" /> Recent Payments
+								<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+									<h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+										<div className="p-2 bg-green-100 rounded-lg">
+											<FaCreditCard className="text-green-600" />
+										</div>
+										Recent Payments
 									</h2>
 									<div className="w-full overflow-x-auto">
 										<Table
@@ -1187,9 +1287,12 @@ export default function DashboardClient() {
 									</div>
 								</div>
 								{/* New Users */}
-								<div className="bg-white rounded-2xl shadow-xl p-4">
-									<h2 className="text-xl font-bold text-pink-800 mb-4 flex items-center gap-2">
-										<FaUserPlus className="text-pink-600" /> New Users
+								<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+									<h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+										<div className="p-2 bg-purple-100 rounded-lg">
+											<FaUserPlus className="text-purple-600" />
+										</div>
+										New Users
 									</h2>
 									<div className="w-full overflow-x-auto">
 										<Table
@@ -1205,16 +1308,13 @@ export default function DashboardClient() {
 													render: (v: any, record: any) => (
 														<span className="flex items-center gap-3">
 															<span className="inline-block w-10 h-10 relative">
-																<Image
-																	src={
-																		record.photoURL || "/ar-lipstick-logo.svg"
+																<UserAvatar
+																	photoURL={record.photoURL}
+																	displayName={
+																		record.displayName || record.name
 																	}
-																	alt={
-																		record.displayName || record.name || "User"
-																	}
-																	width={40}
-																	height={40}
-																	className="rounded-full object-cover border border-pink-200 bg-white"
+																	email={record.email}
+																	size={40}
 																/>
 															</span>
 															<div>
@@ -1236,17 +1336,17 @@ export default function DashboardClient() {
 															Role
 														</span>
 													),
-													dataIndex: "role",
-													key: "role",
-													render: (role: any) => (
+													dataIndex: "roleId",
+													key: "roleId",
+													render: (roleId: any) => (
 														<span
 															className={`px-3 py-0.5 rounded-full text-xs font-bold capitalize ${
-																role === "admin"
+																roleId === "admin"
 																	? "bg-yellow-100 text-yellow-800"
 																	: "bg-pink-100 text-pink-700"
 															}`}
 														>
-															{role}
+															{roleId}
 														</span>
 													),
 												},
@@ -1278,7 +1378,7 @@ export default function DashboardClient() {
 							</div>
 						</>
 					)}
-				</section>
+				</div>
 			</main>
 		);
 	}

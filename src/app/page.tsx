@@ -1,39 +1,38 @@
-"use client";
-
-import Header from "./components/Header";
+import ClientHeader from "./components/ClientHeader";
 import Footer from "./components/Footer";
 import FeatureSection from "./components/FeatureSection";
 import ProductGrid, { Product } from "./components/ProductGrid";
-import { useEffect, useState } from "react";
 
-export default function Home() {
-	const [products, setProducts] = useState<Product[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState("");
+export default async function Home() {
+	let products: Product[] = [];
+	let loading = false;
+	let error = "";
 
-	useEffect(() => {
-		async function fetchProducts() {
-			try {
-				const res = await fetch("/api/products");
-				if (!res.ok) throw new Error("Failed to fetch products");
-				const data = await res.json();
-				setProducts(data);
-			} catch (err: unknown) {
-				if (err instanceof Error) {
-					setError(err.message);
-				} else {
-					setError("Unknown error");
-				}
-			} finally {
-				setLoading(false);
-			}
+	try {
+		const res = await fetch(
+			`${
+				process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+			}/api/products`,
+			{ cache: "no-store" }
+		);
+		if (!res.ok) throw new Error("Failed to fetch products");
+		const data = await res.json();
+		products = data.map((p: any) => ({
+			...p,
+			productId: p.productId || p.id,
+			imageUrl: p.imageUrl || "",
+		}));
+	} catch (err: unknown) {
+		if (err instanceof Error) {
+			error = err.message;
+		} else {
+			error = "Unknown error";
 		}
-		fetchProducts();
-	}, []);
+	}
 
 	return (
 		<div className="min-h-screen flex flex-col bg-gradient-to-b from-pink-50 to-white font-sans">
-			<Header />
+			<ClientHeader />
 			<main className="flex-1 flex flex-col items-center justify-center px-4 w-full">
 				{/* HERO SECTION START */}
 				<section

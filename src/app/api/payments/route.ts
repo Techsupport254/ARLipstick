@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { Payment, GlobalPayment } from "../../types/models";
+import type { Payment } from "../../types/models";
 
 // Prevent static generation of this API route
 export const dynamic = "force-dynamic";
@@ -46,10 +46,53 @@ export async function GET() {
 		}
 
 		const snapshot = await firebaseApp.firestore().collection("payments").get();
-		const payments: GlobalPayment[] = snapshot.docs.map(
-			(doc) => doc.data() as GlobalPayment
+		const payments: Payment[] = snapshot.docs.map(
+			(doc) => doc.data() as Payment
 		);
-		return NextResponse.json(payments);
+
+		// Fetch order statuses for each payment
+		const paymentsWithOrderStatus = await Promise.all(
+			payments.map(async (payment) => {
+				try {
+					if (payment.orderId) {
+						const orderDoc = await firebaseApp
+							.firestore()
+							.collection("orders")
+							.doc(payment.orderId)
+							.get();
+
+						if (orderDoc.exists) {
+							const orderData = orderDoc.data();
+							return {
+								...payment,
+								orderStatus: orderData?.status || "unknown",
+								deliveryLocation:
+									orderData?.deliveryLocation ||
+									payment.deliveryLocation ||
+									null,
+							};
+						}
+					}
+					return {
+						...payment,
+						orderStatus: "unknown",
+						deliveryLocation: payment.deliveryLocation || null,
+					};
+				} catch (error) {
+					console.error(
+						`Error fetching order status for payment ${payment.paymentId}:`,
+						error
+					);
+					return {
+						...payment,
+						orderStatus: "unknown",
+						deliveryLocation: payment.deliveryLocation || null,
+					};
+				}
+			})
+		);
+
+		return NextResponse.json(paymentsWithOrderStatus);
 	} catch (error) {
 		return NextResponse.json(
 			{ message: "Failed to fetch payments", error: (error as Error).message },
@@ -84,7 +127,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		const paymentId = firebaseApp.firestore().collection("payments").doc().id;
-		const globalPayment: GlobalPayment = { ...payment, paymentId, userId: uid };
+		const globalPayment: Payment = { ...payment, paymentId, userId: uid };
 		// Store in global payments
 		await firebaseApp
 			.firestore()

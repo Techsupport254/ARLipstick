@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { GlobalOrder } from "../../../types/models";
+import type { Order } from "../../../types/models";
 
 // Prevent static generation of this API route
 export const dynamic = "force-dynamic";
@@ -33,6 +33,16 @@ export async function PATCH(
 			return NextResponse.json({ message: "Missing status" }, { status: 400 });
 		}
 
+		// Get user and check if admin
+		const authHeader = req.headers.get("authorization");
+		if (!authHeader) {
+			return NextResponse.json(
+				{ message: "Missing Authorization header" },
+				{ status: 401 }
+			);
+		}
+		const idToken = authHeader.replace("Bearer ", "");
+
 		const { getFirebaseAdmin } = await import("../../../firebaseAdmin");
 		const firebaseApp = getFirebaseAdmin();
 		if (!firebaseApp) {
@@ -42,14 +52,62 @@ export async function PATCH(
 			);
 		}
 
-		// Update global order
+		const decoded = await firebaseApp.auth().verifyIdToken(idToken);
+		const uid = decoded.uid;
+
+		// Get user info
+		const userDoc = await firebaseApp
+			.firestore()
+			.collection("users")
+			.doc(uid)
+			.get();
+		const user = userDoc.data();
+		if (!user) {
+			return NextResponse.json({ message: "User not found" }, { status: 404 });
+		}
+
+		// Get the order to check ownership and current status
 		const orderRef = firebaseApp.firestore().collection("orders").doc(orderId);
 		const orderSnap = await orderRef.get();
 		if (!orderSnap.exists) {
 			return NextResponse.json({ message: "Order not found" }, { status: 404 });
 		}
+
+		const order = orderSnap.data() as Order;
+
+		// Check if user is admin OR if user owns the order
+		const isAdmin = user.roleId === "admin";
+		const isOwner = order.userId === uid;
+
+		if (!isAdmin && !isOwner) {
+			return NextResponse.json(
+				{ message: "Unauthorized: You can only update your own orders" },
+				{ status: 403 }
+			);
+		}
+
+		// If user is not admin, they can only cancel orders (not approve/deliver)
+		if (!isAdmin && status !== "cancelled") {
+			return NextResponse.json(
+				{ message: "Customers can only cancel orders" },
+				{ status: 403 }
+			);
+		}
+
+		// Check if order can be cancelled (pending and approved orders can be cancelled)
+		if (
+			status === "cancelled" &&
+			!["pending", "approved"].includes(order.status || "")
+		) {
+			return NextResponse.json(
+				{ message: "Only pending and approved orders can be cancelled" },
+				{ status: 400 }
+			);
+		}
+
+		// Update global order
 		await orderRef.update({ status });
-		const updatedOrder = (await orderRef.get()).data() as GlobalOrder;
+		const updatedOrder = (await orderRef.get()).data() as Order;
 		// Also update in user subcollection
 		if (updatedOrder && updatedOrder.userId) {
 			const userOrderRef = firebaseApp

@@ -62,12 +62,21 @@ export async function GET(req: NextRequest) {
 			return NextResponse.json({ message: "User not found" }, { status: 404 });
 		}
 		// If admin, return all users; otherwise, return only the current user's profile
-		if (user.role === "admin") {
+		if (user.roleId === "admin") {
 			const snapshot = await firebaseApp.firestore().collection("users").get();
-			const users: User[] = snapshot.docs.map((doc) => doc.data() as User);
+			const users: User[] = snapshot.docs.map(
+				(doc) =>
+					({
+						...doc.data(),
+						userId: doc.id, // Include the document ID as userId
+					} as User)
+			);
 			return NextResponse.json(users);
 		} else {
-			return NextResponse.json(user);
+			return NextResponse.json({
+				...user,
+				userId: uid, // Include the document ID as userId
+			});
 		}
 	} catch (error: unknown) {
 		const message = error instanceof Error ? error.message : String(error);
@@ -96,6 +105,8 @@ export async function PATCH(req: NextRequest) {
 		if (body.displayName) updateData.displayName = body.displayName;
 		if (body.bio !== undefined) updateData.bio = body.bio;
 		if (body.phone !== undefined) updateData.phone = body.phone;
+		if (body.roleId !== undefined) updateData.roleId = body.roleId;
+		if (body.status !== undefined) updateData.status = body.status;
 
 		const { getFirebaseAdmin } = await import("../../firebaseAdmin");
 		const firebaseApp = getFirebaseAdmin();
@@ -107,32 +118,14 @@ export async function PATCH(req: NextRequest) {
 		}
 
 		const userRef = firebaseApp.firestore().collection("users").doc(uid);
-		let awardedPoints = false;
-		await firebaseApp.firestore().runTransaction(async (transaction) => {
-			const userDoc = await transaction.get(userRef);
-			const user = userDoc.data() as User | undefined;
-			// Merge new data with existing
-			const merged = { ...user, ...updateData };
-			const hasCompletedProfile = !!(
-				merged.displayName &&
-				merged.bio &&
-				merged.phone
-			);
-			const alreadyAwarded = user?.profileCompleted;
-			transaction.set(userRef, updateData, { merge: true });
-			if (hasCompletedProfile && !alreadyAwarded) {
-				const currentPoints = user?.loyaltyPoints || 0;
-				transaction.set(
-					userRef,
-					{ loyaltyPoints: currentPoints + 20, profileCompleted: true },
-					{ merge: true }
-				);
-				awardedPoints = true;
-			}
+		// Update user profile
+		await userRef.update({
+			...updateData,
+			profileCompleted: true,
 		});
 		const userDoc = await userRef.get();
 		const user = userDoc.data() as User;
-		return NextResponse.json({ ...user, awardedProfilePoints: awardedPoints });
+		return NextResponse.json(user);
 	} catch (error: unknown) {
 		const message = error instanceof Error ? error.message : String(error);
 		return NextResponse.json(

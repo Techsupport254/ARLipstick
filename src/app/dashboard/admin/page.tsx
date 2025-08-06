@@ -7,8 +7,9 @@ import {
 	FaUsers,
 	FaCreditCard,
 } from "react-icons/fa";
+import AdminProtected from "../../components/AdminProtected";
 
-export default function AdminDashboardPage() {
+function AdminDashboardContent() {
 	return (
 		<div className="min-h-screen w-full bg-gradient-to-br from-pink-100 via-rose-50 to-purple-100">
 			<div className="w-full max-w-7xl mx-auto pt-12 px-4">
@@ -79,5 +80,13 @@ export default function AdminDashboardPage() {
 				</div>
 			</div>
 		</div>
+	);
+}
+
+export default function AdminDashboardPage() {
+	return (
+		<AdminProtected>
+			<AdminDashboardContent />
+		</AdminProtected>
 	);
 }

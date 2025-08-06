@@ -1,37 +1,71 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { FaSpinner, FaTimes, FaTint } from "react-icons/fa";
-import { Input, message } from "antd";
+import { FaSpinner, FaTimes, FaTint, FaUpload, FaCheck } from "react-icons/fa";
+import {
+	Input,
+	message,
+	Select,
+	Form,
+	Button,
+	Card,
+	Progress,
+	Tag,
+	Divider,
+} from "antd";
 import type { Product as BaseProduct } from "@/app/types/models";
-type Product = BaseProduct & { hexColor?: string; colorName?: string };
-import "antd/dist/reset.css";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
-const lipstickIcon = (
-	<svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-		<rect width="40" height="40" rx="20" fill="#F9E2E7" />
-		<path
-			d="M20 8c-2 0-3 2-3 4v8h6v-8c0-2-1-4-3-4zm-5 12v8c0 2 1 4 3 4h4c2 0 3-2 3-4v-8h-10z"
-			fill="#E11D48"
-		/>
-	</svg>
-);
+type Product = BaseProduct & { hexColor?: string; colorName?: string };
+
+const { TextArea } = Input;
+const { Option } = Select;
+
+const LIPSTICK_COLORS = [
+	{ name: "Classic Red", hex: "#DC2626" },
+	{ name: "Rose Pink", hex: "#E11D48" },
+	{ name: "Coral", hex: "#F97316" },
+	{ name: "Nude", hex: "#F59E0B" },
+	{ name: "Berry", hex: "#7C3AED" },
+	{ name: "Plum", hex: "#9D174D" },
+	{ name: "Mauve", hex: "#A855F7" },
+	{ name: "Brown", hex: "#92400E" },
+	{ name: "Orange", hex: "#EA580C" },
+	{ name: "Pink", hex: "#EC4899" },
+];
+
+const FINISH_OPTIONS = [
+	{ value: "matte", label: "Matte" },
+	{ value: "gloss", label: "Gloss" },
+	{ value: "satin", label: "Satin" },
+	{ value: "metallic", label: "Metallic" },
+	{ value: "cream", label: "Cream" },
+	{ value: "sheer", label: "Sheer" },
+];
+
+const CATEGORY_OPTIONS = ["Lipstick"];
 
 export default function AddProductPage() {
-	const [name, setName] = useState("");
-	const [colorName, setColorName] = useState("");
-	const [hexColor, setHexColor] = useState("#E11D48");
-	const [price, setPrice] = useState("");
-	const [imageUrl, setImageUrl] = useState("");
-	const [imageFile, setImageFile] = useState<File | null>(null);
-	const [loading, setLoading] = useState(false);
-	const [success, setSuccess] = useState(false);
-	const [error, setError] = useState("");
-	const [products, setProducts] = useState<Product[]>([]);
-	const [shake, setShake] = useState(false);
+	const [form] = Form.useForm();
+	const router = useRouter();
 	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	const [loading, setLoading] = useState(false);
 	const [uploadProgress, setUploadProgress] = useState<number | null>(null);
-	const [stock, setStock] = useState("");
+	const [imageFile, setImageFile] = useState<File | null>(null);
+	const [imageUrl, setImageUrl] = useState("");
+	const [products, setProducts] = useState<Product[]>([]);
+	const [selectedColor, setSelectedColor] = useState(LIPSTICK_COLORS[1]);
+	const [formValues, setFormValues] = useState({
+		name: "",
+		colorName: "",
+		description: "",
+		price: "",
+		oldPrice: "",
+		stock: "",
+		category: "Lipstick",
+		finish: "matte",
+	});
 
 	useEffect(() => {
 		fetch("/api/products")
@@ -43,6 +77,10 @@ export default function AddProductPage() {
 	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
+			if (file.size > 5 * 1024 * 1024) {
+				message.error("Image size should be less than 5MB");
+				return;
+			}
 			setImageFile(file);
 			setImageUrl(URL.createObjectURL(file));
 		}
@@ -51,7 +89,11 @@ export default function AddProductPage() {
 	const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		const file = e.dataTransfer.files?.[0];
-		if (file) {
+		if (file && file.type.startsWith("image/")) {
+			if (file.size > 5 * 1024 * 1024) {
+				message.error("Image size should be less than 5MB");
+				return;
+			}
 			setImageFile(file);
 			setImageUrl(URL.createObjectURL(file));
 		}
@@ -61,290 +103,452 @@ export default function AddProductPage() {
 		e.preventDefault();
 	};
 
-	const handleRemoveImage = (e: React.MouseEvent) => {
-		e.stopPropagation();
+	const handleRemoveImage = () => {
 		setImageFile(null);
 		setImageUrl("");
 		if (fileInputRef.current) fileInputRef.current.value = "";
 	};
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setError("");
-		setSuccess(false);
-		setUploadProgress(null);
-		if (
-			!name ||
-			!colorName ||
-			!hexColor ||
-			!price ||
-			(!imageUrl && !imageFile)
-		) {
-			setError("Please fill in all fields and upload an image.");
-			setShake(true);
-			setTimeout(() => setShake(false), 500);
+	const uploadImage = async (file: File): Promise<string> => {
+		const toBase64 = (file: File) =>
+			new Promise<string>((resolve, reject) => {
+				const reader = new FileReader();
+				reader.readAsDataURL(file);
+				reader.onload = () => resolve(reader.result as string);
+				reader.onerror = (err) => reject(err);
+			});
+
+		setUploadProgress(10);
+		const base64 = await toBase64(file);
+		setUploadProgress(30);
+
+		const uploadRes = await fetch("/api/products/upload-image", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ image: base64 }),
+		});
+
+		setUploadProgress(70);
+		if (!uploadRes.ok) {
+			const data = await uploadRes.json();
+			throw new Error(data.message || "Image upload failed");
+		}
+
+		const { url } = await uploadRes.json();
+		setUploadProgress(100);
+		return url;
+	};
+
+	const onFinish = async (values: any) => {
+		if (!imageFile && !imageUrl) {
+			message.error("Please upload a product image");
 			return;
 		}
+
 		setLoading(true);
+		setUploadProgress(null);
+
 		try {
 			let finalImageUrl = imageUrl;
+
 			if (imageFile) {
-				try {
-					// Convert file to base64
-					const toBase64 = (file: File) =>
-						new Promise<string>((resolve, reject) => {
-							const reader = new FileReader();
-							reader.readAsDataURL(file);
-							reader.onload = () => resolve(reader.result as string);
-							reader.onerror = (err) => reject(err);
-						});
-					setUploadProgress(10);
-					const base64 = await toBase64(imageFile);
-					setUploadProgress(30);
-					// Upload to backend API
-					const uploadRes = await fetch("/api/products/upload-image", {
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({ image: base64 }),
-					});
-					setUploadProgress(70);
-					if (!uploadRes.ok) {
-						const data = await uploadRes.json();
-						throw new Error(data.message || "Cloudinary upload failed");
-					}
-					const { url } = await uploadRes.json();
-					finalImageUrl = url;
-					setUploadProgress(100);
-				} catch {
-					setError(
-						"Image upload failed. Please check your network and try again."
-					);
-					setLoading(false);
-					setUploadProgress(null);
-					return;
-				}
+				finalImageUrl = await uploadImage(imageFile);
 			}
+
+			const productData = {
+				name: values.name,
+				description: values.description,
+				colorName: values.colorName,
+				hexColor: selectedColor.hex,
+				price: values.price,
+				oldPrice: values.oldPrice || undefined,
+				imageUrl: finalImageUrl,
+				stock: values.stock,
+				category: values.category,
+				finish: values.finish,
+			};
+
 			const res = await fetch("/api/products", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					name,
-					colorName,
-					hexColor,
-					price,
-					imageUrl: finalImageUrl,
-					stock,
-				}),
+				body: JSON.stringify(productData),
 			});
+
 			if (!res.ok) {
 				const data = await res.json();
-				throw new Error(data.message || "Failed to add lipstick");
+				throw new Error(data.message || "Failed to add product");
 			}
+
 			const newProduct = await res.json();
 			setProducts((prev) => [newProduct, ...prev]);
-			setSuccess(true);
-			setName("");
-			setColorName("");
-			setHexColor("#E11D48");
-			setPrice("");
-			setImageUrl("");
-			setImageFile(null);
-			setStock("");
-			if (fileInputRef.current) fileInputRef.current.value = "";
-			message.success("Lipstick added successfully!");
-		} catch (err) {
-			setError(
-				err instanceof Error
-					? err.message
-					: "Failed to add lipstick. Please try again."
+
+			message.success("Product added successfully!");
+			form.resetFields();
+			handleRemoveImage();
+			setSelectedColor(LIPSTICK_COLORS[1]);
+		} catch (error) {
+			message.error(
+				error instanceof Error ? error.message : "Failed to add product"
 			);
-			setShake(true);
-			setTimeout(() => setShake(false), 500);
 		} finally {
 			setLoading(false);
 			setUploadProgress(null);
 		}
 	};
 
+	const handleColorSelect = (color: (typeof LIPSTICK_COLORS)[0]) => {
+		setSelectedColor(color);
+		form.setFieldsValue({ colorName: color.name });
+		setFormValues((prev) => ({ ...prev, colorName: color.name }));
+	};
+
+	const handleFormChange = (changedValues: any, allValues: any) => {
+		setFormValues(allValues);
+	};
+
 	return (
-		<div className="min-h-screen w-full bg-gradient-to-br from-pink-100 via-rose-50 to-purple-100 flex flex-col items-center justify-center py-4 sm:py-8 animate-fade-in">
-			<div className="w-full container max-w-8xl mx-auto pt-4 sm:pt-8 px-2 sm:px-4">
-				{/* Inspiration Scroll */}
-				<div className="mb-4 sm:mb-8">
-					<h2 className="text-xl sm:text-2xl font-bold text-pink-600 mb-2 sm:mb-3 font-serif tracking-tight">
-						Existing Lipsticks
-					</h2>
-					<div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 hide-scrollbar">
-						{products.map((p) => (
-							<div
-								key={p.id}
-								className="flex flex-col items-center min-w-[90px] sm:min-w-[110px]"
-							>
-								<div
-									className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-4 border-white shadow-lg bg-white flex items-center justify-center"
-									style={{ background: p.hexColor || "#F9E2E7" }}
-								>
-									<Image
-										src={p.imageUrl}
-										alt={p.name}
-										width={48}
-										height={48}
-										className="w-full h-full object-cover rounded-full"
-									/>
-								</div>
-								<span className="text-xs text-pink-500 font-semibold mt-1 text-center max-w-[70px] sm:max-w-[90px] truncate">
-									{p.name}
-								</span>
-								<span className="text-[10px] text-gray-400">{p.colorName}</span>
-							</div>
-						))}
-					</div>
-				</div>
-				{/* Add Lipstick Card */}
-				<div
-					className={`bg-white/90 rounded-3xl shadow-2xl border border-pink-100 p-3 sm:p-6 md:p-8 relative overflow-visible transition-all duration-300 ${
-						shake ? "animate-shake" : ""
-					}`}
-				>
-					<span className="absolute -top-10 sm:-top-12 left-1/2 -translate-x-1/2 w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-pink-200 via-pink-100 to-rose-100 shadow-lg flex items-center justify-center animate-fade-in-down z-10 border-4 border-white">
-						{lipstickIcon}
-					</span>
-					<h1 className="text-2xl sm:text-4xl font-serif font-extrabold text-pink-700 mb-4 sm:mb-8 text-center mt-20 sm:mt-12 tracking-tight drop-shadow-lg">
-						Add New Lipstick
-					</h1>
-					<div className="flex flex-col md:flex-row gap-4 sm:gap-8 items-start w-full">
-						<form
-							className="flex flex-col gap-4 sm:gap-6 w-full md:w-1/2"
-							onSubmit={handleSubmit}
-							autoComplete="off"
+		<div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50 p-4">
+			<div className="max-w-7xl mx-auto">
+				<div className="mb-8">
+					<div className="flex items-center justify-between mb-4">
+						<div>
+							<h1 className="text-3xl font-bold text-gray-800 mb-2">
+								Add New Product
+							</h1>
+							<p className="text-gray-600">
+								Create a new lipstick product for your collection
+							</p>
+						</div>
+						<Button
+							type="primary"
+							onClick={() => router.push("/dashboard/admin/products")}
+							className="bg-pink-500 hover:bg-pink-600 border-pink-500"
 						>
-							<div className="flex flex-col gap-2">
-								<label className="font-semibold text-pink-500">
-									Lipstick Name
-								</label>
-								<Input
-									placeholder="e.g. Velvet Matte Lipstick"
-									value={name}
-									onChange={(e) => setName(e.target.value)}
-									size="large"
-									className="rounded-xl border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-100 bg-white/80"
-									required
-								/>
-							</div>
-							<div className="flex flex-col gap-2">
-								<label className="font-semibold text-pink-500">
-									Color Name
-								</label>
-								<Input
-									placeholder="e.g. Limuru Pink"
-									value={colorName}
-									onChange={(e) => setColorName(e.target.value)}
-									size="large"
-									className="rounded-xl border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-100 bg-white/80"
-									required
-								/>
-							</div>
-							<div className="flex flex-col gap-2">
-								<label className="font-semibold text-pink-500 flex items-center gap-2">
-									Hex Color <FaTint className="text-pink-400" />
-								</label>
-								<div className="flex items-center gap-3">
-									<Input
-										type="color"
-										value={hexColor}
-										onChange={(e) => setHexColor(e.target.value)}
-										className="w-12 h-12 p-0 border-none bg-transparent cursor-pointer"
-										style={{ background: "none" }}
-										aria-label="Pick lipstick color"
-									/>
-									<Input
-										placeholder="#E11D48"
-										value={hexColor}
-										onChange={(e) => setHexColor(e.target.value)}
-										size="large"
-										className="rounded-xl border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-100 bg-white/80 w-32"
-										required
-									/>
-								</div>
-							</div>
-							<div className="flex flex-col gap-2">
-								<label className="font-semibold text-pink-500">Price</label>
-								<Input
-									prefix={<span className="text-pink-400 font-bold">Ksh</span>}
-									placeholder="e.g. 1200"
-									value={price}
-									onChange={(e) =>
-										setPrice(e.target.value.replace(/[^0-9.]/g, ""))
-									}
-									size="large"
-									type="number"
-									min="0"
-									step="0.01"
-									className="rounded-xl border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-100 bg-white/80"
-									required
-								/>
-							</div>
-							<div className="flex flex-col gap-2">
-								<label className="font-semibold text-pink-500">Stock</label>
-								<Input
-									placeholder="e.g. 100"
-									value={stock}
-									onChange={(e) =>
-										setStock(e.target.value.replace(/[^0-9]/g, ""))
-									}
-									size="large"
-									type="number"
-									min="0"
-									className="rounded-xl border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-100 bg-white/80"
-									required
-								/>
-							</div>
-							<div className="flex flex-col gap-2">
-								<label className="font-semibold text-pink-500">
-									Product Image
-								</label>
-								<div
-									className={`flex flex-col items-center justify-center border-2 border-dashed rounded-2xl p-6 cursor-pointer transition-all duration-200 bg-white/70 border-pink-200 hover:border-pink-400 relative ${
-										imageUrl ? "border-green-300" : ""
-									}`}
-									onClick={() => fileInputRef.current?.click()}
-									onDrop={handleDrop}
-									onDragOver={handleDragOver}
-									tabIndex={0}
-									role="button"
-									aria-label="Upload product image"
-								>
-									{imageUrl ? (
-										<div className="relative">
+							View All Products
+						</Button>
+					</div>
+
+					{products.length > 0 && (
+						<Card className="mb-6">
+							<h3 className="text-lg font-semibold text-gray-700 mb-4">
+								Existing Products
+							</h3>
+							<div className="flex gap-3 overflow-x-auto pb-2">
+								{products.slice(0, 10).map((product) => (
+									<div
+										key={product.productId}
+										className="flex-shrink-0 text-center"
+									>
+										<div
+											className="w-16 h-16 rounded-full border-2 border-white shadow-md mb-2 overflow-hidden"
+											style={{ backgroundColor: product.hexColor || "#F9E2E7" }}
+										>
 											<Image
-												src={imageUrl}
-												alt="Preview"
-												width={128}
-												height={128}
-												className="w-32 h-32 object-cover rounded-xl mb-2 border border-pink-200 shadow"
+												src={product.imageUrl}
+												alt={product.name}
+												width={64}
+												height={64}
+												className="w-full h-full object-cover"
 											/>
+										</div>
+										<p className="text-xs text-gray-600 font-medium truncate w-16">
+											{product.name}
+										</p>
+										<p className="text-xs text-gray-400">
+											Ksh {product.price?.toLocaleString()}
+										</p>
+									</div>
+								))}
+							</div>
+						</Card>
+					)}
+				</div>
+
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+					<div className="lg:col-span-2">
+						<Card className="shadow-lg border-0">
+							<Form
+								form={form}
+								layout="vertical"
+								onFinish={onFinish}
+								onValuesChange={handleFormChange}
+								initialValues={{
+									category: "Lipstick",
+									finish: "matte",
+									stock: 0,
+								}}
+							>
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+									<Form.Item
+										name="name"
+										label="Product Name"
+										rules={[
+											{ required: true, message: "Please enter product name" },
+										]}
+									>
+										<Input
+											placeholder="e.g., Velvet Matte Lipstick"
+											size="large"
+											className="rounded-lg"
+										/>
+									</Form.Item>
+
+									<Form.Item
+										name="colorName"
+										label="Color Name"
+										rules={[
+											{ required: true, message: "Please enter color name" },
+										]}
+									>
+										<Input
+											placeholder="e.g., Limuru Pink"
+											size="large"
+											className="rounded-lg"
+										/>
+									</Form.Item>
+
+									<Form.Item
+										name="description"
+										label="Description"
+										rules={[
+											{
+												required: true,
+												message: "Please enter product description",
+											},
+										]}
+										className="md:col-span-2"
+									>
+										<TextArea
+											placeholder="Describe the product features, benefits, and characteristics..."
+											rows={4}
+											className="rounded-lg"
+										/>
+									</Form.Item>
+
+									{/* Price and Old Price Row */}
+									<div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+										<Form.Item
+											name="price"
+											label="Price (KSH)"
+											rules={[
+												{ required: true, message: "Please enter price" },
+												{
+													validator: (_, value) => {
+														if (value && Number(value) > 0) {
+															return Promise.resolve();
+														}
+														return Promise.reject(
+															new Error("Price must be greater than 0")
+														);
+													},
+												},
+											]}
+										>
+											<Input
+												type="number"
+												placeholder="1200"
+												size="large"
+												prefix="Ksh"
+												className="rounded-lg"
+												min="1"
+												step="0.01"
+											/>
+										</Form.Item>
+
+										<Form.Item
+											name="oldPrice"
+											label="Old Price (KSH) - Optional"
+										>
+											<Input
+												type="number"
+												placeholder="1500"
+												size="large"
+												prefix="Ksh"
+												className="rounded-lg"
+												min="0"
+												step="0.01"
+											/>
+										</Form.Item>
+									</div>
+
+									{/* Stock, Category, and Finish Row */}
+									<div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
+										<Form.Item
+											name="stock"
+											label="Stock Quantity"
+											rules={[
+												{
+													required: true,
+													message: "Please enter stock quantity",
+												},
+												{
+													validator: (_, value) => {
+														if (value && Number(value) >= 0) {
+															return Promise.resolve();
+														}
+														return Promise.reject(
+															new Error("Stock must be 0 or greater")
+														);
+													},
+												},
+											]}
+										>
+											<Input
+												type="number"
+												placeholder="100"
+												size="large"
+												className="rounded-lg"
+												min="0"
+												step="1"
+											/>
+										</Form.Item>
+
+										<Form.Item name="category" label="Category">
+											<Input
+												value="Lipstick"
+												disabled
+												size="large"
+												className="rounded-lg bg-gray-50"
+											/>
+										</Form.Item>
+
+										<Form.Item
+											name="finish"
+											label="Finish Type"
+											rules={[
+												{ required: true, message: "Please select finish" },
+											]}
+										>
+											<Select size="large" className="rounded-lg">
+												{FINISH_OPTIONS.map((finish) => (
+													<Option key={finish.value} value={finish.value}>
+														{finish.label}
+													</Option>
+												))}
+											</Select>
+										</Form.Item>
+									</div>
+								</div>
+
+								<Divider>Color Selection</Divider>
+								<div className="mb-6">
+									<p className="text-sm text-gray-600 mb-4">
+										Choose a color for your lipstick or enter a custom hex code
+									</p>
+									<div className="grid grid-cols-5 gap-3 mb-4">
+										{LIPSTICK_COLORS.map((color) => (
 											<button
+												key={color.hex}
 												type="button"
-												onClick={handleRemoveImage}
-												className="absolute -top-2 -right-2 bg-white border border-pink-200 rounded-full p-1 shadow hover:bg-pink-100 transition"
-												aria-label="Remove image"
+												onClick={() => handleColorSelect(color)}
+												className={`p-3 rounded-lg border-2 transition-all ${
+													selectedColor.hex === color.hex
+														? "border-pink-500 shadow-lg scale-105"
+														: "border-gray-200 hover:border-pink-300"
+												}`}
+												style={{ backgroundColor: color.hex }}
 											>
-												<FaTimes className="text-pink-400 text-lg" />
+												<div className="w-full h-8 rounded-md bg-white/20 flex items-center justify-center">
+													{selectedColor.hex === color.hex && (
+														<FaCheck className="text-white text-sm" />
+													)}
+												</div>
+												<p className="text-xs text-white font-medium mt-1 text-center drop-shadow">
+													{color.name}
+												</p>
 											</button>
-										</div>
-									) : (
-										<div className="flex flex-col items-center">
-											<span className="mb-2">{lipstickIcon}</span>
-											<span className="text-pink-300 text-lg mb-2">
-												Drag & drop or click to upload
-											</span>
-										</div>
-									)}
+										))}
+									</div>
+
+									<div className="flex items-center gap-3">
+										<Input
+											type="color"
+											value={selectedColor.hex}
+											onChange={(e) =>
+												setSelectedColor({
+													name: "Custom",
+													hex: e.target.value,
+												})
+											}
+											className="w-12 h-12 p-0 border-2 border-gray-200 rounded-lg cursor-pointer"
+										/>
+										<Input
+											value={selectedColor.hex}
+											onChange={(e) =>
+												setSelectedColor({
+													name: "Custom",
+													hex: e.target.value,
+												})
+											}
+											placeholder="#E11D48"
+											className="rounded-lg"
+										/>
+										<Tag color="pink" className="px-3 py-1">
+											{selectedColor.name}
+										</Tag>
+									</div>
+								</div>
+
+								<Divider>Product Image</Divider>
+								<div className="mb-6">
+									<div
+										className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all ${
+											imageUrl
+												? "border-green-300 bg-green-50"
+												: "border-gray-300 hover:border-pink-400 bg-gray-50"
+										}`}
+										onClick={() => fileInputRef.current?.click()}
+										onDrop={handleDrop}
+										onDragOver={handleDragOver}
+									>
+										{imageUrl ? (
+											<div className="relative inline-block">
+												<Image
+													src={imageUrl}
+													alt="Preview"
+													width={200}
+													height={200}
+													className="rounded-lg shadow-md"
+												/>
+												<Button
+													type="text"
+													icon={<FaTimes />}
+													onClick={(e) => {
+														e.stopPropagation();
+														handleRemoveImage();
+													}}
+													className="absolute -top-2 -right-2 bg-white border border-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow-md"
+												/>
+											</div>
+										) : (
+											<div>
+												<FaUpload className="text-4xl text-gray-400 mx-auto mb-4" />
+												<p className="text-lg font-medium text-gray-600 mb-2">
+													Upload Product Image
+												</p>
+												<p className="text-sm text-gray-500">
+													Drag and drop an image here, or click to select
+												</p>
+												<p className="text-xs text-gray-400 mt-2">
+													Supports: JPG, PNG, GIF (Max 5MB)
+												</p>
+											</div>
+										)}
+									</div>
+
 									{uploadProgress !== null && (
-										<div className="text-pink-500 text-center font-semibold animate-fade-in mt-2">
-											Uploading image: {uploadProgress}%
+										<div className="mt-4">
+											<Progress
+												percent={uploadProgress}
+												status="active"
+												strokeColor="#ec4899"
+											/>
+											<p className="text-sm text-gray-600 text-center mt-2">
+												Uploading image... {uploadProgress}%
+											</p>
 										</div>
 									)}
+
 									<input
 										type="file"
 										accept="image/*"
@@ -353,73 +557,113 @@ export default function AddProductPage() {
 										onChange={handleImageChange}
 									/>
 								</div>
+							</Form>
+						</Card>
+					</div>
+
+					<div className="lg:col-span-1">
+						<Card className="shadow-lg border-0 sticky top-4">
+							<div className="text-center mb-6">
+								<h3 className="text-xl font-bold text-gray-800 mb-2">
+									Live Preview
+								</h3>
+								<p className="text-sm text-gray-600">
+									See how your product will appear
+								</p>
 							</div>
-							{error && (
-								<div className="text-red-500 text-center font-semibold animate-fade-in mt-2">
-									{error}
+
+							<div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+								<div className="relative mb-4">
+									<div
+										className="w-full h-48 rounded-lg overflow-hidden bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center"
+										style={{ backgroundColor: selectedColor.hex + "20" }}
+									>
+										{imageUrl ? (
+											<Image
+												src={imageUrl}
+												alt="Product Preview"
+												width={200}
+												height={200}
+												className="object-contain w-full h-full"
+											/>
+										) : (
+											<div className="text-center">
+												<FaTint className="text-6xl text-gray-300 mx-auto mb-2" />
+												<p className="text-gray-400 text-sm">
+													No image uploaded
+												</p>
+											</div>
+										)}
+									</div>
+
+									<div
+										className="absolute top-2 right-2 w-8 h-8 rounded-full border-2 border-white shadow-md"
+										style={{ backgroundColor: selectedColor.hex }}
+									/>
 								</div>
-							)}
-							{success && (
-								<div className="text-green-600 text-center font-semibold animate-fade-in mt-2">
-									Lipstick added successfully!
+
+								<div className="space-y-3">
+									<h4 className="font-bold text-lg text-gray-800">
+										{formValues.name || "Product Name"}
+									</h4>
+
+									<div className="flex items-center gap-2">
+										<Tag color="pink" className="text-xs">
+											{formValues.category || "Lipstick"}
+										</Tag>
+										<Tag color="purple" className="text-xs capitalize">
+											{formValues.finish || "matte"}
+										</Tag>
+									</div>
+
+									<p className="text-sm text-gray-600">
+										{formValues.colorName || "Color Name"}
+									</p>
+
+									<p className="text-xs text-gray-500">
+										{formValues.description ||
+											"Product description will appear here..."}
+									</p>
+
+									<div className="flex items-center justify-between pt-2">
+										<div>
+											{formValues.oldPrice && (
+												<p className="text-sm text-gray-400 line-through">
+													Ksh {Number(formValues.oldPrice).toLocaleString()}
+												</p>
+											)}
+											<p className="text-xl font-bold text-pink-600">
+												Ksh {Number(formValues.price || 0).toLocaleString()}
+											</p>
+										</div>
+
+										<div className="text-right">
+											<p className="text-sm text-gray-500">Stock</p>
+											<p className="font-semibold text-gray-700">
+												{formValues.stock || 0}
+											</p>
+										</div>
+									</div>
 								</div>
-							)}
-							<button
-								type="submit"
-								disabled={loading}
-								className={`w-full mt-2 px-8 py-4 rounded-full shadow-2xl font-bold text-lg transition-all duration-150 ${
-									loading
-										? "bg-gray-300 text-gray-500 cursor-not-allowed"
-										: "bg-gradient-to-r from-pink-500 to-pink-400 text-white hover:from-pink-600 hover:to-pink-500 border-2 border-pink-200 hover:border-pink-400"
-								}`}
-							>
-								{loading ? (
-									<span className="flex items-center justify-center gap-2">
-										<FaSpinner className="animate-spin" /> Adding Lipstick...
-									</span>
-								) : (
-									"Add Lipstick"
-								)}
-							</button>
-						</form>
-						{/* Live Preview Card - now on the right on desktop */}
-						<div className="w-full md:w-1/2 flex flex-col items-center justify-start mt-8 md:mt-0 md:ml-8">
-							<h3 className="text-lg font-bold text-pink-500 mb-2 font-serif">
-								Live Preview
-							</h3>
-							<div className="bg-white rounded-2xl shadow-lg border border-pink-100 p-4 flex flex-col items-center w-full max-w-xs mx-auto animate-fade-in">
-								<div
-									className="w-20 h-20 rounded-full border-4 border-pink-200 overflow-hidden shadow-lg bg-white flex items-center justify-center mb-3"
-									style={{ background: hexColor }}
-								>
-									{imageUrl ? (
-										<Image
-											src={imageUrl}
-											alt="Preview"
-											width={80}
-											height={80}
-											className="object-cover w-full h-full"
-										/>
-									) : (
-										lipstickIcon
-									)}
-								</div>
-								<div className="text-xl font-bold text-gray-800 mb-1 text-center font-serif">
-									{name || "Lipstick Name"}
-								</div>
-								<div className="text-pink-500 font-semibold mb-1 text-center">
-									{colorName || "Color Name"}
-								</div>
-								<div className="text-gray-500 text-sm mb-1">{hexColor}</div>
-								<div className="text-pink-600 font-bold text-lg">
-									{price ? `Ksh ${parseInt(price).toLocaleString()}` : "Ksh 0"}
+
+								{/* Submit Button in Live Preview */}
+								<div className="mt-6">
+									<Button
+										type="primary"
+										htmlType="submit"
+										loading={loading}
+										size="large"
+										className="w-full bg-pink-500 hover:bg-pink-600 border-pink-500 h-12 text-lg font-medium rounded-lg shadow-lg"
+										onClick={() => form.submit()}
+									>
+										{loading ? "Adding Product..." : "Add Product"}
+									</Button>
 								</div>
 							</div>
-						</div>
+						</Card>
 					</div>
 				</div>
 			</div>
-			<style>{`.hide-scrollbar::-webkit-scrollbar{display:none}.animate-shake{animation:shake 0.3s}@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-8px)}40%,60%{transform:translateX(8px)}}`}</style>
 		</div>
 	);
 }

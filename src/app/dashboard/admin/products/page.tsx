@@ -6,15 +6,19 @@ import Image from "next/image";
 import Link from "next/link";
 
 type Product = {
-	id: string;
+	productId: string;
 	name: string;
 	price: number;
 	oldPrice?: number;
 	imageUrl: string;
+	description?: string;
+	stock?: number;
 	colorName?: string;
 	hexColor?: string;
-	status?: string;
-	stock?: number;
+	finish?: string;
+	category?: string;
+	createdAt?: string;
+	updatedAt?: string;
 };
 
 export default function AdminProductsPage() {
@@ -118,7 +122,7 @@ export default function AdminProductsPage() {
 			title: "Actions",
 			key: "actions",
 			render: (_: unknown, record: Product) => (
-				<Link href={`/dashboard/admin/products/${record.id}/edit`}>
+				<Link href={`/dashboard/admin/products/${record.productId}/edit`}>
 					<Button type="link">Edit</Button>
 				</Link>
 			),
@@ -144,7 +148,7 @@ export default function AdminProductsPage() {
 								columns={columns}
 								dataSource={products}
 								pagination={false}
-								rowKey="id"
+								rowKey="productId"
 								locale={{
 									emptyText: (
 										<Empty

@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
 		const userDoc = await app.firestore().collection("users").doc(uid).get();
 		const user = userDoc.data();
 		console.log("STATS: User profile:", user);
-		const isAdmin = user && user.role === "admin";
+		const isAdmin = user && user.roleId === "admin";
 		console.log("STATS: isAdmin:", isAdmin);
 
 		if (isAdmin) {
@@ -80,6 +80,8 @@ export async function GET(req: NextRequest) {
 				id: doc.id,
 				...doc.data(),
 			})) as Array<Record<string, any>>;
+			console.log("STATS: Total orders found:", orders.length);
+			console.log("STATS: Sample order:", orders[0]);
 			const products = productsSnapshot.docs.map((doc) => ({
 				id: doc.id,
 				...doc.data(),
@@ -103,8 +105,8 @@ export async function GET(req: NextRequest) {
 					);
 				}).length,
 				roles: {
-					admin: users.filter((u) => u.role === "admin").length,
-					user: users.filter((u) => u.role === "user").length,
+					admin: users.filter((u) => u.roleId === "admin").length,
+					user: users.filter((u) => u.roleId === "user").length,
 				},
 			};
 			// Compute product stats
@@ -355,10 +357,20 @@ export async function GET(req: NextRequest) {
 					status: o.status,
 					createdAt: o.createdAt,
 					customerName: (() => {
-						const user = users.find((u) => u.uid === o.userId);
+						const user = users.find((u) => (u.uid || u.id) === o.userId);
 						return user ? user.displayName || user.email : "Unknown";
 					})(),
+					customerEmail: (() => {
+						const user = users.find((u) => (u.uid || u.id) === o.userId);
+						return user ? user.email : "Unknown";
+					})(),
+					customerPhotoURL: (() => {
+						const user = users.find((u) => (u.uid || u.id) === o.userId);
+						return user ? user.photoURL : null;
+					})(),
 				}));
+			console.log("STATS: Recent orders count:", recentOrders.length);
+			console.log("STATS: Recent orders sample:", recentOrders[0]);
 			const recentPayments = [...payments]
 				.sort(
 					(a, b) =>
@@ -371,6 +383,8 @@ export async function GET(req: NextRequest) {
 					amount: Number(p.amount),
 					status: p.status,
 					createdAt: p.createdAt,
+					orderId: p.orderId,
+					transactionRef: p.transactionRef || p.paystackRef,
 				}));
 			const newUsers = [...users]
 				.sort(
@@ -383,7 +397,8 @@ export async function GET(req: NextRequest) {
 					displayName: u.displayName,
 					email: u.email,
 					createdAt: u.createdAt,
-					role: u.role,
+					roleId: u.roleId,
+					photoURL: u.photoURL,
 				}));
 			const recentActivity = { recentOrders, recentPayments, newUsers };
 			// Compute order status distribution

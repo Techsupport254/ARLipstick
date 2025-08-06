@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { Order, GlobalOrder } from "../../types/models";
+import type { Order } from "../../types/models";
 
 // Prevent static generation of this API route
 export const dynamic = "force-dynamic";
@@ -65,10 +65,29 @@ export async function GET(req: NextRequest) {
 			const orders: Order[] = snapshot.docs.map((doc) => doc.data() as Order);
 			return NextResponse.json(orders);
 		}
-		// Default: fetch all orders (admin)
+		// Default: fetch all orders (admin) - requires authentication
+		const uid = await getUserFromRequest(req);
+		if (uid && typeof uid === "object" && "status" in uid) {
+			return uid;
+		}
+		
+		// Check if user is admin
+		const userDoc = await firebaseApp
+			.firestore()
+			.collection("users")
+			.doc(uid)
+			.get();
+		const user = userDoc.data();
+		if (!user || user.roleId !== "admin") {
+			return NextResponse.json(
+				{ message: "Unauthorized: Admin access required" },
+				{ status: 403 }
+			);
+		}
+
 		const snapshot = await firebaseApp.firestore().collection("orders").get();
-		const orders: GlobalOrder[] = snapshot.docs.map(
-			(doc) => doc.data() as GlobalOrder
+		const orders: Order[] = snapshot.docs.map(
+			(doc) => doc.data() as Order
 		);
 		return NextResponse.json(orders);
 	} catch (error) {
@@ -118,11 +137,10 @@ export async function POST(req: NextRequest) {
 			phoneNumber: order.phoneNumber, // Added
 			paystackRef: order.paystackRef, // Added
 		};
-		const globalOrder: GlobalOrder = {
+		const globalOrder: Order = {
 			...order,
 			orderId,
 			userId: uid,
-			paymentId: paymentId,
 			subtotal: order.subtotal,
 			vat: order.vat,
 			deliveryFee: order.deliveryFee,
@@ -174,39 +192,10 @@ export async function POST(req: NextRequest) {
 				deliveryFee: order.deliveryFee,
 			});
 
-		// Loyalty Points: 1 point per 100 KES spent
-		const pointsEarned = Math.floor(order.total / 100);
+		// Update user profile completion status
 		const userRef = firebaseApp.firestore().collection("users").doc(uid);
-		await firebaseApp.firestore().runTransaction(async (transaction) => {
-			// First, perform all reads
-			const userDoc = await transaction.get(userRef);
-			const currentPoints =
-				(userDoc.exists && userDoc.data()?.loyaltyPoints) || 0;
-
-			// Read all product documents
-			const productRefs = order.items.map((item) =>
-				firebaseApp.firestore().collection("products").doc(item.productId)
-			);
-			const productDocs = await Promise.all(
-				productRefs.map((ref) => transaction.get(ref))
-			);
-
-			// Then, perform all writes
-			transaction.set(
-				userRef,
-				{ loyaltyPoints: currentPoints + pointsEarned },
-				{ merge: true }
-			);
-
-			// Update product stock for each item
-			order.items.forEach((item, index) => {
-				const productDoc = productDocs[index];
-				if (productDoc.exists) {
-					const currentStock = productDoc.data()?.stock || 0;
-					const newStock = Math.max(0, currentStock - (item.quantity || 1));
-					transaction.update(productRefs[index], { stock: newStock });
-				}
-			});
+		await userRef.update({
+			profileCompleted: true,
 		});
 		return NextResponse.json({
 			message: "Order and payment created",

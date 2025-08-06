@@ -6,17 +6,14 @@ import { app } from "../firebaseConfig";
 import Sidebar from "./components/Sidebar";
 import Image from "next/image";
 import Breadcrumb from "./components/Breadcrumb";
-
-const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
-	.split(",")
-	.map((e) => e.trim())
-	.filter(Boolean);
+import UserAvatar from "../components/UserAvatar";
 
 type UserType = {
 	uid: string;
 	email: string;
 	displayName: string;
 	photoURL: string | null;
+	roleId?: string;
 };
 
 export default function DashboardLayout({
@@ -74,7 +71,7 @@ export default function DashboardLayout({
 		);
 	}
 
-	const isAdmin = !!user && ADMIN_EMAILS.includes(user.email);
+	const isAdmin = !!user && user.roleId === "admin";
 
 	// Centralized breadcrumb logic
 	function getBreadcrumbItems(pathname: string) {
@@ -144,12 +141,12 @@ export default function DashboardLayout({
 								</button>
 								{user && (
 									<>
-										<Image
-											src={user.photoURL || "/ar-lipstick-logo.svg"}
-											alt={user.displayName || user.email}
-											width={48}
-											height={48}
-											className="rounded-full object-cover border border-pink-200 bg-white profile-avatar"
+										<UserAvatar
+											photoURL={user.photoURL}
+											displayName={user.displayName}
+											email={user.email}
+											size={48}
+											className="profile-avatar"
 										/>
 										<span className="hidden sm:flex flex-col">
 											<span className="font-semibold text-pink-700">

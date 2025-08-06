@@ -17,7 +17,13 @@ export default function Shop() {
 				const res = await fetch("/api/products");
 				if (!res.ok) throw new Error("Failed to fetch products");
 				const data = await res.json();
-				setProducts(data);
+				// Map 'id' to 'productId' if needed for compatibility
+				const normalized = data.map((p: any) => ({
+					...p,
+					productId: p.productId || p.id,
+					imageUrl: p.imageUrl || "",
+				}));
+				setProducts(normalized);
 			} catch (err: unknown) {
 				if (err instanceof Error) {
 					setError(err.message);

@@ -11,19 +11,21 @@ import {
 	FaCrown,
 	FaEdit,
 	FaIdBadge,
-	FaStar,
+	FaPhone,
+	FaCalendarAlt,
 } from "react-icons/fa";
 
-const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
-	.split(",")
-	.map((e) => e.trim())
-	.filter(Boolean);
-
 type UserType = {
-	uid: string;
+	uid?: string;
+	userId?: string;
 	email: string;
 	displayName: string;
 	photoURL: string | null;
+	roleId?: string;
+	bio?: string;
+	phone?: string;
+	createdAt?: string;
+	status?: string;
 };
 
 export default function ProfilePage() {
@@ -33,10 +35,9 @@ export default function ProfilePage() {
 	const [bio, setBio] = useState("");
 	const [isEditing, setIsEditing] = useState(false);
 	const [editName, setEditName] = useState("");
-	const loyaltyPoints = 120;
-	const loyaltyMax = 200;
 	const [saveLoading, setSaveLoading] = useState(false);
 	const [saveError, setSaveError] = useState<string | null>(null);
+	const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
 	const [editBio, setEditBio] = useState("");
 	const [phone, setPhone] = useState("");
 	const [editPhone, setEditPhone] = useState("");
@@ -45,24 +46,37 @@ export default function ProfilePage() {
 		const auth = getAuth(app);
 		const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
 			if (firebaseUser) {
-				const idToken = await firebaseUser.getIdToken();
-				const res = await fetch("/api/users", {
-					method: "GET",
-					headers: { Authorization: `Bearer ${idToken}` },
-				});
-				const data = await res.json();
-				let userData = data;
-				if (Array.isArray(data)) {
-					// Admin: find the current user's profile in the array
-					userData = data.find((u) => u.uid === firebaseUser.uid) || data[0];
+				try {
+					const idToken = await firebaseUser.getIdToken();
+					const res = await fetch("/api/users", {
+						method: "GET",
+						headers: { Authorization: `Bearer ${idToken}` },
+					});
+
+					if (!res.ok) {
+						throw new Error("Failed to fetch user data");
+					}
+
+					const data = await res.json();
+					let userData = data;
+					if (Array.isArray(data)) {
+						// Admin: find the current user's profile in the array
+						userData =
+							data.find((u) => u.userId === firebaseUser.uid) || data[0];
+					}
+
+					setUser(userData);
+					setEditName(userData.displayName || "");
+					setBio(userData.bio || "");
+					setEditBio(userData.bio || "");
+					setPhone(userData.phone || "");
+					setEditPhone(userData.phone || "");
+				} catch (error) {
+					console.error("Error fetching user data:", error);
+					setSaveError("Failed to load profile data");
+				} finally {
+					setLoading(false);
 				}
-				setUser(userData);
-				setEditName(userData.displayName);
-				setBio(userData.bio || "");
-				setEditBio(userData.bio || "");
-				setPhone(userData.phone || "");
-				setEditPhone(userData.phone || "");
-				setLoading(false);
 			} else {
 				router.replace("/login");
 			}
@@ -79,6 +93,19 @@ export default function ProfilePage() {
 			.toUpperCase();
 	};
 
+	const formatDate = (dateString?: string) => {
+		if (!dateString) return "Unknown";
+		try {
+			return new Date(dateString).toLocaleDateString("en-US", {
+				year: "numeric",
+				month: "long",
+				day: "numeric",
+			});
+		} catch {
+			return "Unknown";
+		}
+	};
+
 	const handleEdit = () => {
 		setIsEditing(true);
 	};
@@ -86,6 +113,7 @@ export default function ProfilePage() {
 	const handleSave = async () => {
 		setSaveLoading(true);
 		setSaveError(null);
+		setSaveSuccess(null);
 		try {
 			const auth = getAuth(app);
 			const currentUser = auth.currentUser;
@@ -112,6 +140,10 @@ export default function ProfilePage() {
 			setBio(updatedUser.bio || "");
 			setPhone(updatedUser.phone || "");
 			setIsEditing(false);
+			setSaveSuccess("Profile updated successfully!");
+
+			// Clear success message after 3 seconds
+			setTimeout(() => setSaveSuccess(null), 3000);
 		} catch (err: unknown) {
 			let message = "Failed to update profile";
 			if (err instanceof Error) message = err.message;
@@ -154,7 +186,7 @@ export default function ProfilePage() {
 									className="rounded-full border-4 border-pink-300 shadow-xl object-cover w-24 h-24 sm:w-32 sm:h-32 bg-white relative z-10"
 								/>
 							) : (
-								<div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-green-600 flex items-center justify-center text-white text-3xl sm:text-5xl font-bold border-4 border-pink-300 shadow-xl relative z-10">
+								<div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-r from-pink-200 via-pink-100 to-rose-100 flex items-center justify-center text-pink-600 text-3xl sm:text-5xl font-bold border-4 border-pink-300 shadow-xl relative z-10">
 									{getInitials(user?.displayName)}
 								</div>
 							)}
@@ -180,7 +212,7 @@ export default function ProfilePage() {
 								<span>{user?.email}</span>
 							</label>
 							<label className="flex items-center gap-2 text-gray-600 text-base">
-								<FaIdBadge className="text-pink-300" />
+								<FaPhone className="text-pink-300" />
 								{isEditing ? (
 									<input
 										type="tel"
@@ -201,24 +233,27 @@ export default function ProfilePage() {
 							</label>
 							<span className="text-xs text-gray-400 flex items-center gap-1">
 								<FaIdBadge className="inline text-pink-200" />
-								<span className="font-semibold">User ID:</span> {user?.uid}
+								<span className="font-semibold">User ID:</span>{" "}
+								{user?.userId || user?.uid}
+							</span>
+							<span className="text-xs text-gray-400 flex items-center gap-1">
+								<FaCalendarAlt className="inline text-pink-200" />
+								<span className="font-semibold">Joined:</span>{" "}
+								{formatDate(user?.createdAt)}
 							</span>
 							<span
 								className={`inline-flex items-center gap-1 px-4 py-1 rounded-full text-xs font-bold shadow ${
-									ADMIN_EMAILS.includes(user?.email ?? "")
+									user?.roleId === "admin"
 										? "bg-yellow-100 text-yellow-700"
 										: "bg-pink-100 text-pink-600"
 								}`}
 							>
-								{ADMIN_EMAILS.includes(user?.email ?? "") ? (
+								{user?.roleId === "admin" ? (
 									<FaCrown className="text-yellow-400" />
 								) : (
 									<FaUserShield className="text-pink-400" />
 								)}
-								Role:{" "}
-								{ADMIN_EMAILS.includes(user?.email ?? "")
-									? "Admin"
-									: "Beauty Lover"}
+								Role: {user?.roleId === "admin" ? "Administrator" : "Customer"}
 							</span>
 						</div>
 						<div className="mb-2 flex flex-col items-center gap-2">
@@ -245,39 +280,40 @@ export default function ProfilePage() {
 								)}
 							</label>
 						</div>
-						<div className="flex flex-col items-center gap-2 mb-6 w-full">
-							<div className="flex items-center gap-2">
-								<span className="font-bold text-pink-700 flex items-center gap-1">
-									<FaStar className="text-yellow-400" /> Loyalty Points:
-								</span>
-								<span className="text-pink-600 font-bold">{loyaltyPoints}</span>
-								<span className="text-xs text-gray-400">/ {loyaltyMax}</span>
-							</div>
-							<div className="w-3/4 h-3 bg-pink-100 rounded-full overflow-hidden shadow-inner mx-auto">
-								<div
-									className="h-full bg-gradient-to-r from-pink-400 via-pink-300 to-yellow-200 rounded-full transition-all duration-500"
-									style={{ width: `${(loyaltyPoints / loyaltyMax) * 100}%` }}
-								></div>
-							</div>
-						</div>
-						<div className="flex justify-center mt-4">
+
+						<div className="flex justify-center gap-3 mt-4">
 							{isEditing ? (
-								<button
-									onClick={handleSave}
-									disabled={saveLoading}
-									className="bg-pink-500 hover:bg-pink-600 focus:ring-4 focus:ring-pink-200 text-white font-semibold px-6 py-2 rounded-xl shadow transition text-base flex items-center gap-2 disabled:opacity-60"
-								>
-									{saveLoading ? (
-										<span
-											className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block align-middle"
-											aria-label="Saving"
-											role="status"
-										></span>
-									) : (
-										<FaEdit className="text-white text-lg" />
-									)}
-									Save
-								</button>
+								<>
+									<button
+										onClick={handleSave}
+										disabled={saveLoading}
+										className="bg-pink-500 hover:bg-pink-600 focus:ring-4 focus:ring-pink-200 text-white font-semibold px-6 py-2 rounded-xl shadow transition text-base flex items-center gap-2 disabled:opacity-60"
+									>
+										{saveLoading ? (
+											<span
+												className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block align-middle"
+												aria-label="Saving"
+												role="status"
+											></span>
+										) : (
+											<FaEdit className="text-white text-lg" />
+										)}
+										Save
+									</button>
+									<button
+										onClick={() => {
+											setIsEditing(false);
+											setEditName(user?.displayName || "");
+											setEditBio(user?.bio || "");
+											setEditPhone(user?.phone || "");
+											setSaveError(null);
+											setSaveSuccess(null);
+										}}
+										className="bg-gray-500 hover:bg-gray-600 focus:ring-4 focus:ring-gray-200 text-white font-semibold px-6 py-2 rounded-xl shadow transition text-base"
+									>
+										Cancel
+									</button>
+								</>
 							) : (
 								<button
 									onClick={handleEdit}
@@ -288,7 +324,14 @@ export default function ProfilePage() {
 							)}
 						</div>
 						{saveError && (
-							<div className="text-red-500 text-sm mt-2">{saveError}</div>
+							<div className="text-red-500 text-sm mt-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+								{saveError}
+							</div>
+						)}
+						{saveSuccess && (
+							<div className="text-green-600 text-sm mt-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+								{saveSuccess}
+							</div>
 						)}
 					</div>
 				</div>

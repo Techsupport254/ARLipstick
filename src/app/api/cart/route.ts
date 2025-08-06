@@ -80,12 +80,14 @@ export async function POST(req: NextRequest) {
 			.collection("cart")
 			.doc(productId);
 		const cartItem: CartItem = {
+			cartItemId: productId,
+			cartId: uid,
 			productId,
 			quantity,
 			addedAt: new Date().toISOString(),
-			...(name !== undefined ? { name } : {}),
-			...(price !== undefined ? { price } : {}),
-			...(imageUrl !== undefined ? { imageUrl } : {}),
+			name: name || "",
+			price: price || 0,
+			imageUrl: imageUrl || "",
 		};
 		await cartRef.set(cartItem, { merge: true });
 		return NextResponse.json({ message: "Added to cart" });

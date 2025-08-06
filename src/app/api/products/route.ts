@@ -39,8 +39,8 @@ export async function GET() {
 
 		const snapshot = await firebaseApp.firestore().collection("products").get();
 		const products: Product[] = snapshot.docs.map((doc) => ({
-			id: doc.id,
-			...(doc.data() as Omit<Product, "id">),
+			productId: doc.id,
+			...(doc.data() as Omit<Product, "productId">),
 		}));
 		return NextResponse.json(products);
 	} catch (error) {
@@ -61,10 +61,21 @@ export async function POST(req: Request) {
 
 	try {
 		const body = await req.json();
-		const { name, colorName, hexColor, price, imageUrl, stock } = body;
+		const {
+			name,
+			colorName,
+			hexColor,
+			price,
+			imageUrl,
+			stock,
+			description,
+			category,
+			finish,
+			oldPrice,
+		} = body;
 		if (
 			!name ||
-			!colorName ||
+			!description ||
 			!hexColor ||
 			!price ||
 			!imageUrl ||
@@ -86,33 +97,26 @@ export async function POST(req: Request) {
 		}
 
 		const numericStock = Number(stock);
-		const status = numericStock === 0 ? "sold out" : "on sale";
-		const docRef = await firebaseApp
-			.firestore()
-			.collection("products")
-			.add({
-				name,
-				colorName,
-				hexColor,
-				price: Number(price),
-				imageUrl,
-				category: "Lipstick",
-				createdAt: new Date().toISOString(),
-				stock: numericStock,
-				status,
-			});
-		const newProduct = {
-			id: docRef.id,
+		const docRef = firebaseApp.firestore().collection("products").doc();
+		const productId = docRef.id;
+		const createdAt = new Date().toISOString();
+		const productData = {
+			productId,
 			name,
-			colorName,
-			hexColor,
+			description,
 			price: Number(price),
 			imageUrl,
-			category: "Lipstick",
+			category: category || "Lipstick",
 			stock: numericStock,
-			status,
+			colorName: colorName || "",
+			hexColor,
+			finish: finish || "matte",
+			oldPrice: oldPrice ? Number(oldPrice) : undefined,
+			createdAt,
+			updatedAt: createdAt,
 		};
-		return NextResponse.json(newProduct);
+		await docRef.set(productData);
+		return NextResponse.json(productData);
 	} catch (error) {
 		return NextResponse.json(
 			{ message: "Failed to add product", error: (error as Error).message },
@@ -134,11 +138,8 @@ export async function PATCH(req: Request) {
 		if (fields.stock !== undefined) {
 			const numericStock = Number(fields.stock);
 			fields.stock = numericStock;
-			fields.status = numericStock === 0 ? "sold out" : "on sale";
-		} else {
-			delete fields.status; // Don't allow manual status update
 		}
-
+		fields.updatedAt = new Date().toISOString();
 		const { getFirebaseAdmin } = await import("../../firebaseAdmin");
 		const firebaseApp = getFirebaseAdmin();
 		if (!firebaseApp) {
@@ -147,7 +148,6 @@ export async function PATCH(req: Request) {
 				{ status: 500 }
 			);
 		}
-
 		await firebaseApp.firestore().collection("products").doc(id).update(fields);
 		return NextResponse.json({ message: "Product updated" });
 	} catch (error) {

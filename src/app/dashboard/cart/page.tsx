@@ -204,7 +204,7 @@ export default function CartPage() {
 	}
 
 	function getProductInfo(productId: string): Product | undefined {
-		return products.find((p) => p.id === productId);
+		return products.find((p) => p.productId === productId);
 	}
 
 	function calculateSubtotal(): number {

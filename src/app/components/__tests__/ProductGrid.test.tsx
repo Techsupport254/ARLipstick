@@ -18,7 +18,7 @@ jest.mock("firebase/auth", () => ({
 
 const mockProducts: Product[] = [
 	{
-		id: "1",
+		productId: "1",
 		name: "Ruby Red Lipstick",
 		description: "A beautiful ruby red lipstick",
 		price: 1500,
@@ -29,7 +29,7 @@ const mockProducts: Product[] = [
 		hexColor: "#FF0000",
 	},
 	{
-		id: "2",
+		productId: "2",
 		name: "Pink Gloss",
 		description: "Shiny pink lip gloss",
 		price: 800,
@@ -143,7 +143,7 @@ describe("ProductGrid Component", () => {
 	it("handles products without optional fields", () => {
 		const minimalProducts: Product[] = [
 			{
-				id: "1",
+				productId: "1",
 				name: "Basic Lipstick",
 				price: 1000,
 				imageUrl: "/test.jpg",

@@ -41,33 +41,81 @@ export async function POST(req: NextRequest) {
 		const userRecord = await firebaseApp.auth().getUser(decodedToken.uid);
 		// Fallback: use decodedToken.picture if userRecord.photoURL is missing
 		const photoURL = userRecord.photoURL || decodedToken.picture || null;
-		const userDocRef: DocumentReference = firebaseApp
+
+		// Check if a user with this email already exists
+		const existingUserQuery = await firebaseApp
 			.firestore()
 			.collection("users")
-			.doc(userRecord.uid);
-		const userDoc: DocumentSnapshot = await userDocRef.get();
+			.where("email", "==", userRecord.email)
+			.limit(1)
+			.get();
+
 		let userData;
-		if (!userDoc.exists) {
+		let userDocRef: DocumentReference;
+
+		if (!existingUserQuery.empty) {
+			// User with this email exists - link accounts
+			const existingUserDoc = existingUserQuery.docs[0];
+			const existingUserData = existingUserDoc.data();
+
+			// Update the existing user document with Firebase Auth UID
+			userDocRef = existingUserDoc.ref;
 			userData = {
-				uid: userRecord.uid,
-				email: userRecord.email,
-				displayName: userRecord.displayName,
-				photoURL,
-				createdAt: new Date().toISOString(),
-				role: "user",
-				phone: userRecord.phoneNumber || null,
+				...existingUserData,
+				userId: userRecord.uid, // Link to Firebase Auth UID
+				photoURL: photoURL || existingUserData.photoURL, // Use new photo if available
+				displayName: userRecord.displayName || existingUserData.displayName, // Use new name if available
+				phone: userRecord.phoneNumber || existingUserData.phone || "",
+				lastLoginAt: new Date().toISOString(),
 			};
+
+			// Update the existing user document
 			await userDocRef.set(userData, { merge: true });
+
+			console.log(
+				`Linked existing user ${existingUserData.email} to Firebase Auth UID ${userRecord.uid}`
+			);
 		} else {
-			userData = userDoc.data();
+			// No existing user with this email - create new user
+			userDocRef = firebaseApp
+				.firestore()
+				.collection("users")
+				.doc(userRecord.uid);
+
+			const userDoc: DocumentSnapshot = await userDocRef.get();
+
+			if (!userDoc.exists) {
+				userData = {
+					userId: userRecord.uid,
+					email: userRecord.email,
+					displayName: userRecord.displayName,
+					photoURL,
+					roleId: "customer", // Default roleId is 'customer'
+					phone: userRecord.phoneNumber || "",
+					bio: "",
+					profileCompleted: false,
+					status: "active",
+					createdAt: new Date().toISOString(),
+					lastLoginAt: new Date().toISOString(),
+				};
+				await userDocRef.set(userData, { merge: true });
+			} else {
+				userData = userDoc.data();
+			}
 		}
 		return NextResponse.json({
 			user: {
-				uid: userRecord.uid,
+				userId: userRecord.uid,
 				email: userRecord.email,
 				displayName: userRecord.displayName,
 				photoURL,
-				role: userData?.role || "user",
+				roleId: userData?.roleId || "customer",
+				phone: userData?.phone || "",
+				bio: userData?.bio || "",
+				profileCompleted: userData?.profileCompleted || false,
+				status: userData?.status || "active",
+				createdAt: userData?.createdAt || new Date().toISOString(),
+				lastLoginAt: userData?.lastLoginAt || new Date().toISOString(),
 			},
 		});
 	} catch (error: unknown) {

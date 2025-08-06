@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
 import type { User } from "../../../types/models";
 import Image from "next/image";
+import UserAvatar from "../../../components/UserAvatar";
 
 const columns = [
 	{
@@ -12,12 +13,11 @@ const columns = [
 		key: "user",
 		render: (_: unknown, user: User) => (
 			<span className="flex items-center gap-3">
-				<Image
-					src={user.photoURL || "/ar-lipstick-logo.svg"}
-					alt={user.displayName || user.email || "User"}
-					width={32}
-					height={32}
-					className="rounded-full border border-pink-200 bg-white"
+				<UserAvatar
+					photoURL={user.photoURL}
+					displayName={user.displayName}
+					email={user.email}
+					size={32}
 				/>
 				<span>
 					<span className="font-semibold text-black block">
@@ -30,9 +30,34 @@ const columns = [
 	},
 	{
 		title: "Role",
-		dataIndex: "role",
-		key: "role",
-		render: (v: string) => v || "-",
+		dataIndex: "roleId",
+		key: "roleId",
+		render: (roleId: string) => {
+			if (!roleId) return <span className="text-gray-400">-</span>;
+
+			const roleConfig = {
+				admin: { bg: "bg-yellow-100", text: "text-yellow-800", label: "Admin" },
+				customer: {
+					bg: "bg-pink-100",
+					text: "text-pink-700",
+					label: "Customer",
+				},
+			};
+
+			const config = roleConfig[roleId as keyof typeof roleConfig] || {
+				bg: "bg-gray-100",
+				text: "text-gray-700",
+				label: roleId,
+			};
+
+			return (
+				<span
+					className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${config.bg} ${config.text}`}
+				>
+					{config.label}
+				</span>
+			);
+		},
 	},
 	{
 		title: "Bio",
@@ -50,9 +75,75 @@ const columns = [
 		title: "Created At",
 		dataIndex: "createdAt",
 		key: "createdAt",
-		render: (v: string) => (v ? new Date(v).toLocaleString() : "-"),
+		render: (v: string) => {
+			if (!v) return "-";
+
+			const date = new Date(v);
+			const day = date.getDate();
+			const month = date.toLocaleDateString("en-US", { month: "long" });
+			const year = date.getFullYear();
+
+			// Add ordinal suffix to day
+			const getOrdinalSuffix = (day: number) => {
+				if (day > 3 && day < 21) return "th";
+				switch (day % 10) {
+					case 1:
+						return "st";
+					case 2:
+						return "nd";
+					case 3:
+						return "rd";
+					default:
+						return "th";
+				}
+			};
+
+			return `${day}${getOrdinalSuffix(day)} ${month}, ${year}`;
+		},
 	},
-	{ title: "User ID", dataIndex: "uid", key: "uid" },
+	{
+		title: "Last Login",
+		dataIndex: "lastLoginAt",
+		key: "lastLoginAt",
+		render: (v: string) => {
+			if (!v) return "-";
+
+			const date = new Date(v);
+			const now = new Date();
+			const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+
+			// If less than 24 hours, show just the time
+			if (diffInHours < 24) {
+				return date.toLocaleTimeString("en-US", {
+					hour: "2-digit",
+					minute: "2-digit",
+					hour12: true,
+				});
+			}
+
+			// If more than 24 hours, show the full date
+			const day = date.getDate();
+			const month = date.toLocaleDateString("en-US", { month: "long" });
+			const year = date.getFullYear();
+
+			// Add ordinal suffix to day
+			const getOrdinalSuffix = (day: number) => {
+				if (day > 3 && day < 21) return "th";
+				switch (day % 10) {
+					case 1:
+						return "st";
+					case 2:
+						return "nd";
+					case 3:
+						return "rd";
+					default:
+						return "th";
+				}
+			};
+
+			return `${day}${getOrdinalSuffix(day)} ${month}, ${year}`;
+		},
+	},
 ];
 
 export default function AdminUsersPage() {
@@ -111,7 +202,7 @@ export default function AdminUsersPage() {
 								columns={columns}
 								dataSource={users}
 								pagination={false}
-								rowKey="uid"
+								rowKey="userId"
 								className="rounded-xl overflow-hidden min-w-[900px]"
 								scroll={{ x: true }}
 							/>

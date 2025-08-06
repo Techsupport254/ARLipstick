@@ -34,7 +34,7 @@ export default function EditProductPage() {
 				const res = await fetch("/api/products");
 				if (!res.ok) throw new Error("Failed to fetch products");
 				const data: Product[] = await res.json();
-				const found = data.find((p: Product) => p.id === id);
+				const found = data.find((p: Product) => p.productId === id);
 				if (!found) throw new Error("Product not found");
 				setName(found.name || "");
 				setColorName(found.colorName || "");
@@ -96,7 +96,7 @@ export default function EditProductPage() {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					id,
+					productId: id,
 					name,
 					colorName,
 					hexColor,

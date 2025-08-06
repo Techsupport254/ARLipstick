@@ -1,92 +1,124 @@
 // User document
 export interface User {
-	uid: string;
+	userId: string;
 	email: string;
-	displayName: string;
+	displayName?: string;
 	photoURL?: string;
-	createdAt: string; // ISO or Firestore timestamp
-	role?: string;
-	bio?: string; // Add bio field
-	phone?: string | null; // Add phone field
-	loyaltyPoints?: number; // Add loyalty points field
-	profileCompleted?: boolean; // Track if profile completion points awarded
+	roleId: string;
+	phone?: string;
+	bio?: string;
+	profileCompleted: boolean;
+	status: string;
+	createdAt?: string;
+	lastLoginAt?: string;
+}
+
+// UserRole document
+export interface UserRole {
+	roleId: string;
+	roleName: string;
+	description?: string;
+	permissions?: string;
+	createdAt?: string;
 }
 
 // Product document
 export interface Product {
-	id: string;
+	productId: string;
 	name: string;
 	description?: string;
 	price: number;
 	imageUrl: string;
 	category?: string;
 	stock?: number;
+	colorName?: string;
+	hexColor?: string;
+	finish?: string;
+	oldPrice?: number;
+	createdAt: string;
+	updatedAt?: string;
+}
+
+// Cart document
+export interface Cart {
+	cartId: string;
+	userId: string;
 	createdAt?: string;
 	updatedAt?: string;
-	colorName?: string; // Added for color name support
-	hexColor?: string; // Added for hex color support
-	oldPrice?: number; // Added for old price support
 }
 
-// Cart item (subcollection under user)
+// Cart item
 export interface CartItem {
+	cartItemId: string;
+	cartId: string;
 	productId: string;
 	quantity: number;
-	addedAt: string;
-	// Optionally cache product info for display
-	name?: string;
 	price?: number;
+	name?: string;
 	imageUrl?: string;
+	addedAt?: string;
 }
 
-// Order document (subcollection under user)
+// Order document
 export interface Order {
 	orderId: string;
-	items: Array<{
-		productId: string;
-		quantity: number;
-		priceAtPurchase: number;
-		name?: string;
-		imageUrl?: string;
-	}>;
-	total: number;
+	userId: string;
+	cartId?: string;
+	total?: number;
 	subtotal?: number;
 	vat?: number;
 	deliveryFee?: number;
-	status: "pending" | "paid" | "shipped" | "delivered" | "cancelled";
-	createdAt: string;
-	shippingAddress?: {
-		line1: string;
-		line2?: string;
-		city: string;
-		postalCode: string;
-		country: string;
-	};
-	paymentId?: string;
+	status?: string;
+	createdAt?: string;
+	shippingAddress?: any;
 	deliveryLocation?: string;
 	phoneNumber?: string;
 	paystackRef?: string;
+	items?: OrderItem[];
 }
 
-// Payment document (subcollection under user)
+// OrderItem document
+export interface OrderItem {
+	orderItemId: string;
+	orderId: string;
+	productId: string;
+	quantity: number;
+	priceAtPurchase?: number;
+	subtotal?: number;
+	name?: string;
+	imageUrl?: string;
+}
+
+// Payment document
 export interface Payment {
 	paymentId: string;
 	orderId: string;
-	amount: number;
-	status: "pending" | "completed" | "failed";
-	method: string;
+	userId: string;
+	amount?: number;
+	status?: string;
+	method?: string;
 	transactionRef?: string;
-	createdAt: string;
+	createdAt?: string;
+	orderStatus?: string; // Status of the associated order
+	deliveryLocation?: string; // Delivery location from associated order
 }
 
-// Global Order document (for /orders/{orderId})
-export interface GlobalOrder extends Order {
+// RegistrationCode document
+export interface RegistrationCode {
+	codeId: string;
 	userId: string;
+	code: string;
+	expiresAt: string;
+	used?: boolean;
+	createdAt?: string;
 }
 
-// Global Payment document (for /payments/{paymentId})
-export interface GlobalPayment extends Payment {
+// LoginCode document
+export interface LoginCode {
+	codeId: string;
 	userId: string;
+	code: string;
+	expiresAt: string;
+	used?: boolean;
+	createdAt?: string;
 }
-
-// Note: Use Order/Payment for subcollections under users, and GlobalOrder/GlobalPayment for global collections.

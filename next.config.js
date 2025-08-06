@@ -1,7 +1,4 @@
 const nextConfig = {
-	experimental: {
-		serverComponentsExternalPackages: ["@tensorflow/tfjs", "onnxruntime-web"],
-	},
 	images: {
 		remotePatterns: [
 			{
@@ -30,12 +27,14 @@ const nextConfig = {
 				...config.resolve.fallback,
 				fs: false,
 				path: false,
+				crypto: false,
+				stream: false,
+				util: false,
+				buffer: false,
 			};
 		}
 		return config;
 	},
-	// Disable static generation for the entire app to prevent API route prerendering
-	output: "standalone",
 };
 
 module.exports = nextConfig;

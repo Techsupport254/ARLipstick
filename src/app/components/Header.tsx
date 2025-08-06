@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { app } from "../firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
+import { app, auth } from "../firebaseConfig";
 import {
 	AiOutlineHome,
 	AiOutlineUser,
@@ -13,6 +13,7 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
+import UserAvatar from "./UserAvatar";
 
 export default function Header() {
 	const [user, setUser] = useState<null | {
@@ -26,10 +27,22 @@ export default function Header() {
 	const router = useRouter();
 
 	const handleLogout = async () => {
-		const auth = getAuth(app);
-		await auth.signOut();
-		setUser(null);
-		router.push("/login");
+		if (!auth) {
+			console.warn("Firebase auth not initialized");
+			setUser(null);
+			router.push("/login");
+			return;
+		}
+
+		try {
+			await auth.signOut();
+			setUser(null);
+			router.push("/login");
+		} catch (error) {
+			console.error("Logout error:", error);
+			setUser(null);
+			router.push("/login");
+		}
 	};
 
 	useEffect(() => {
@@ -37,16 +50,20 @@ export default function Header() {
 	}, []);
 
 	useEffect(() => {
-		const auth = getAuth(app);
+		if (!app || !auth) {
+			console.warn("Firebase not initialized, skipping auth state listener");
+			return;
+		}
+
 		const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
 			if (firebaseUser) {
 				setUser({
 					displayName: firebaseUser.displayName || "User",
-					photoURL: firebaseUser.photoURL || "/ar-lipstick-logo.svg",
+					photoURL: firebaseUser.photoURL || null,
 				});
 				// Fetch cart count
-				const idToken = await firebaseUser.getIdToken();
 				try {
+					const idToken = await firebaseUser.getIdToken();
 					const res = await fetch("/api/cart", {
 						headers: { Authorization: `Bearer ${idToken}` },
 					});
@@ -69,7 +86,7 @@ export default function Header() {
 
 	return (
 		<header className="w-full sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-pink-100 shadow-sm">
-			<div className="max-w-7xl mx-auto flex items-center justify-between px-2 sm:px-4 py-3 sm:py-4">
+			<div className="container mx-auto flex items-center justify-between px-2 sm:px-4 py-3 sm:py-4">
 				<Link href="/" className="flex items-center gap-2 select-none">
 					{/* Lipstick SVG Icon */}
 					<svg
@@ -122,13 +139,11 @@ export default function Header() {
 								className="flex items-center gap-2 px-3 py-1.5 rounded-full border-2 border-pink-200 hover:bg-pink-50 focus:bg-pink-100 transition"
 								onClick={() => setCartOpen((open) => !open)}
 							>
-								<Image
-									src={user.photoURL || "/ar-lipstick-logo.svg"}
-									alt="Profile"
-									width={32}
-									height={32}
-									className="w-8 h-8 rounded-full border-2 border-pink-200 object-cover bg-white"
-									priority
+								<UserAvatar
+									photoURL={user.photoURL}
+									displayName={user.displayName}
+									size={32}
+									className="w-8 h-8 border-2 border-pink-200"
 								/>
 								<span className="hidden md:inline font-semibold text-gray-700">
 									{user.displayName}
