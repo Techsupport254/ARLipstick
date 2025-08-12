@@ -240,12 +240,6 @@ async function registerAdmin() {
 		// Admin users to create
 		const adminUsers = [
 			{
-				email: "victorquaint@gmail.com",
-				displayName: "Victor Quaint",
-				phone: "+254700000000",
-				bio: "System Administrator for AR Lipstick",
-			},
-			{
 				email: "Mercykitur84@gmail.com",
 				displayName: "Mercy Kitur",
 				phone: "+254700000001",
