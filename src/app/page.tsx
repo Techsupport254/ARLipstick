@@ -9,7 +9,14 @@ export default async function Home() {
 	let error = "";
 
 	try {
-		const res = await fetch(`/api/products`, { cache: "no-store" });
+		// For production, we need to handle the URL properly
+		const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+		const host = process.env.VERCEL_URL || 'localhost:3000';
+		const baseUrl = `${protocol}://${host}`;
+		
+		const res = await fetch(`${baseUrl}/api/products`, {
+			cache: "no-store",
+		});
 		if (!res.ok) throw new Error("Failed to fetch products");
 		const data = await res.json();
 		products = data.map((p: any) => ({
@@ -24,7 +31,6 @@ export default async function Home() {
 			error = "Unknown error";
 		}
 	}
-
 	return (
 		<div className="min-h-screen flex flex-col bg-gradient-to-b from-pink-50 to-white font-sans">
 			<ClientHeader />
