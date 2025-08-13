@@ -1,36 +1,41 @@
+"use client";
+
 import ClientHeader from "./components/ClientHeader";
 import Footer from "./components/Footer";
 import FeatureSection from "./components/FeatureSection";
 import ProductGrid, { Product } from "./components/ProductGrid";
+import { useEffect, useState } from "react";
 
-export default async function Home() {
-	let products: Product[] = [];
-	let loading = false;
-	let error = "";
+export default function Home() {
+	const [products, setProducts] = useState<Product[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState("");
 
-	try {
-		// For production, we need to handle the URL properly
-		const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-		const host = process.env.VERCEL_URL || "localhost:3000";
-		const baseUrl = `${protocol}://${host}`;
-
-		const res = await fetch(`${baseUrl}/api/products`, {
-			cache: "no-store",
-		});
-		if (!res.ok) throw new Error("Failed to fetch products");
-		const data = await res.json();
-		products = data.map((p: any) => ({
-			...p,
-			productId: p.productId || p.id,
-			imageUrl: p.imageUrl || "",
-		}));
-	} catch (err: unknown) {
-		if (err instanceof Error) {
-			error = err.message;
-		} else {
-			error = "Unknown error";
+	useEffect(() => {
+		async function fetchProducts() {
+			try {
+				const res = await fetch("/api/products");
+				if (!res.ok) throw new Error("Failed to fetch products");
+				const data = await res.json();
+				// Map 'id' to 'productId' if needed for compatibility
+				const normalized = data.map((p: any) => ({
+					...p,
+					productId: p.productId || p.id,
+					imageUrl: p.imageUrl || "",
+				}));
+				setProducts(normalized);
+			} catch (err: unknown) {
+				if (err instanceof Error) {
+					setError(err.message);
+				} else {
+					setError("Unknown error");
+				}
+			} finally {
+				setLoading(false);
+			}
 		}
-	}
+		fetchProducts();
+	}, []);
 	return (
 		<div className="min-h-screen flex flex-col bg-gradient-to-b from-pink-50 to-white font-sans">
 			<ClientHeader />
