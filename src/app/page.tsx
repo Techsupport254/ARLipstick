@@ -10,10 +10,10 @@ export default async function Home() {
 
 	try {
 		// For production, we need to handle the URL properly
-		const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-		const host = process.env.VERCEL_URL || 'localhost:3000';
+		const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+		const host = process.env.VERCEL_URL || "localhost:3000";
 		const baseUrl = `${protocol}://${host}`;
-		
+
 		const res = await fetch(`${baseUrl}/api/products`, {
 			cache: "no-store",
 		});
