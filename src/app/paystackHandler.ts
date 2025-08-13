@@ -57,9 +57,16 @@ export async function handlePaystackPayment(
 			"Paystack SDK not loaded. Make sure the Paystack script is included in your app."
 		);
 	}
-	const email = params.user?.email;
+	let email = params.user?.email;
 	if (!email) {
-		throw new Error("User email is required for payment");
+		// Try to get email from the user object if it's a string
+		if (typeof params.user === 'string') {
+			email = params.user;
+		}
+	}
+	
+	if (!email) {
+		throw new Error("User email is required for payment. Please ensure your account has a valid email address.");
 	}
 	return new Promise((resolve, reject) => {
 		const handler = (

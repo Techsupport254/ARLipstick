@@ -245,8 +245,26 @@ export default function CartPage() {
 				setCheckoutLoading(false);
 				return;
 			}
-			if (!user.email) {
-				setCheckoutMessage("User email is required for payment.");
+			
+			// Get user email with fallback to Firestore
+			let userEmail = user.email;
+			if (!userEmail) {
+				try {
+					const idToken = await user.getIdToken();
+					const userRes = await fetch("/api/users", {
+						headers: { Authorization: `Bearer ${idToken}` },
+					});
+					if (userRes.ok) {
+						const userData = await userRes.json();
+						userEmail = userData.email;
+					}
+				} catch (error) {
+					console.error("Failed to fetch user email from Firestore:", error);
+				}
+			}
+			
+			if (!userEmail) {
+				setCheckoutMessage("User email is required for payment. Please contact support.");
 				setCheckoutLoading(false);
 				return;
 			}
@@ -272,7 +290,7 @@ export default function CartPage() {
 				phoneNumber,
 				deliveryLocation,
 				orderItems,
-				user: { email: user.email! },
+				user: { email: userEmail },
 				idToken,
 				subtotal,
 				vat,
