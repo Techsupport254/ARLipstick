@@ -79,7 +79,9 @@ export async function POST(req: NextRequest) {
 		// If user doesn't have userId field, try to find the Auth user
 		if (!userData?.userId) {
 			try {
-				const authUser = await firebaseApp.auth().getUserByEmail(userData?.email);
+				const authUser = await firebaseApp
+					.auth()
+					.getUserByEmail(userData?.email);
 				updateData.userId = authUser.uid;
 			} catch (error) {
 				console.log("Could not find Auth user for email:", userData?.email);
@@ -87,7 +89,11 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Activate the user account
-		await firebaseApp.firestore().collection("users").doc(userId).update(updateData);
+		await firebaseApp
+			.firestore()
+			.collection("users")
+			.doc(userId)
+			.update(updateData);
 
 		// Create cart for user if it doesn't exist
 		const authUserId = updateData.userId || userData?.userId;
@@ -100,28 +106,30 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Get the updated user data
-		const userDoc = await firebaseApp
+		const updatedUserDoc = await firebaseApp
 			.firestore()
 			.collection("users")
 			.doc(userId)
 			.get();
 
-		const userData = userDoc.data();
+		const updatedUserData = updatedUserDoc.data();
 
 		// Use the Auth user ID if available, otherwise use Firestore document ID
-		const authUserId = userData?.userId || userId;
+		const finalAuthUserId = updatedUserData?.userId || userId;
 
 		// Create a custom token for the user
-		const customToken = await firebaseApp.auth().createCustomToken(authUserId);
+		const customToken = await firebaseApp
+			.auth()
+			.createCustomToken(finalAuthUserId);
 
 		return NextResponse.json({
 			message: "Registration successful",
 			user: {
-				uid: authUserId,
-				email: userData?.email,
-				displayName: userData?.displayName,
-				photoURL: userData?.photoURL,
-				role: userData?.roleId,
+				uid: finalAuthUserId,
+				email: updatedUserData?.email,
+				displayName: updatedUserData?.displayName,
+				photoURL: updatedUserData?.photoURL,
+				role: updatedUserData?.roleId,
 			},
 			customToken,
 		});

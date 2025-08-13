@@ -21,6 +21,9 @@ function ARLipstickTryOn({ color }: { color: string }) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const [arError, setArError] = useState<string>("");
 	const [isArLoading, setIsArLoading] = useState(true);
+	const arRef = useRef<
+		{ stop: () => void; updateColor: (color: string) => void } | undefined
+	>();
 
 	// Ensure canvas size matches video stream resolution
 	useEffect(() => {
@@ -45,20 +48,26 @@ function ARLipstickTryOn({ color }: { color: string }) {
 	}, []);
 
 	useEffect(() => {
-		let stop: (() => void) | undefined;
-
 		async function startAR() {
 			if (videoRef.current && canvasRef.current) {
 				try {
 					setIsArLoading(true);
 					setArError("");
 
-					const cleanup = await startLipstickAR(
+					// Stop previous AR session if running
+					if (arRef.current) {
+						arRef.current.stop();
+						arRef.current = undefined;
+					}
+
+					console.log("Starting AR with color:", color);
+
+					const arSystem = await startLipstickAR(
 						videoRef.current,
 						canvasRef.current,
 						color
 					);
-					stop = cleanup;
+					arRef.current = arSystem;
 					setIsArLoading(false);
 				} catch (error) {
 					console.error("AR Error:", error);
@@ -71,9 +80,28 @@ function ARLipstickTryOn({ color }: { color: string }) {
 		startAR();
 
 		return () => {
-			if (stop) stop();
+			if (arRef.current) {
+				arRef.current.stop();
+				arRef.current = undefined;
+			}
 		};
 	}, [color]);
+
+	// Update color when it changes
+	useEffect(() => {
+		if (arRef.current) {
+			console.log("Updating AR color to:", color);
+			arRef.current.updateColor(color);
+		}
+	}, [color]);
+
+	// Debug: Log when component mounts/unmounts
+	useEffect(() => {
+		console.log("ARLipstickTryOn component mounted with color:", color);
+		return () => {
+			console.log("ARLipstickTryOn component unmounting");
+		};
+	}, []);
 
 	return (
 		<div className="relative w-full max-w-3xl flex items-center justify-center bg-gradient-to-br from-pink-100 via-white to-purple-100 rounded-xl sm:rounded-2xl border border-pink-200 shadow-lg overflow-hidden mb-6 sm:mb-8 min-h-[220px] sm:min-h-[320px]">
@@ -96,6 +124,13 @@ function ARLipstickTryOn({ color }: { color: string }) {
 						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
 						<p className="text-sm">Starting AR...</p>
 					</div>
+				</div>
+			)}
+
+			{/* Color update indicator */}
+			{!isArLoading && (
+				<div className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-white/80 text-pink-600 px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-semibold shadow">
+					Color: {color}
 				</div>
 			)}
 
@@ -218,6 +253,17 @@ function VirtualTryOnContent() {
 		}
 	}, [selected]);
 
+	// Debug: Log color changes
+	useEffect(() => {
+		if (selected) {
+			const finalColor =
+				selected.hexColor && isValidHexColor(selected.hexColor)
+					? selected.hexColor
+					: "#dc3753";
+			console.log("Final color being passed to AR:", finalColor);
+		}
+	}, [selected]);
+
 	return (
 		<div className="min-h-screen flex flex-col bg-gradient-to-br from-pink-100 via-rose-50 to-purple-100 font-sans">
 			<Header />
@@ -236,6 +282,7 @@ function VirtualTryOnContent() {
 					<div className="w-full container bg-white/90 rounded-xl sm:rounded-3xl shadow-2xl border border-pink-100 flex flex-col items-center p-4 sm:p-10">
 						{selected && (
 							<ARLipstickTryOn
+								key={`${selected.productId}-${selected.hexColor}`}
 								color={
 									selected.hexColor && isValidHexColor(selected.hexColor)
 										? selected.hexColor
@@ -258,6 +305,24 @@ function VirtualTryOnContent() {
 										kes {selected.price.toLocaleString()}
 									</p>
 								)}
+								{/* Color indicator */}
+								<div className="flex items-center justify-center gap-2 mt-2">
+									<span className="text-sm text-gray-600">Color:</span>
+									<div
+										className="w-6 h-6 rounded-full border-2 border-gray-300"
+										style={{
+											background:
+												selected.hexColor && isValidHexColor(selected.hexColor)
+													? selected.hexColor
+													: "#dc3753",
+										}}
+									/>
+									<span className="text-sm text-gray-600">
+										{selected.hexColor && isValidHexColor(selected.hexColor)
+											? selected.hexColor
+											: "#dc3753"}
+									</span>
+								</div>
 							</div>
 						)}
 

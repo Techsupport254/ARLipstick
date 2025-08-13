@@ -126,243 +126,11 @@ export function lerp(a: number, b: number, t: number): number {
 }
 
 /**
- * Color conversion utilities for realistic lipstick rendering
+ * Color processing utilities for lipstick rendering
  *
- * These functions handle conversion between RGB and HSV color spaces,
- * which is essential for natural-looking lipstick application that
- * preserves skin texture while changing color.
+ * Simplified color blending that directly applies the target lipstick color
+ * to the detected lip area without excessive color space conversions.
  */
-
-/**
- * Converts RGB color values to HSV (Hue, Saturation, Value)
- *
- * HSV is better for color manipulation because it separates color (hue),
- * intensity (saturation), and brightness (value) components.
- *
- * @param r - Red component (0-255)
- * @param g - Green component (0-255)
- * @param b - Blue component (0-255)
- * @returns [hue, saturation, value] where hue is 0-360, sat/value are 0-1
- */
-function rgbToHsv(r: number, g: number, b: number): [number, number, number] {
-	// Normalize RGB values to 0-1 range
-	r /= 255;
-	g /= 255;
-	b /= 255;
-
-	const max = Math.max(r, g, b);
-	const min = Math.min(r, g, b);
-	let h: number | undefined;
-	const d = max - min;
-	const v = max;
-	const s = max === 0 ? 0 : d / max;
-
-	// Calculate hue based on which component is dominant
-	if (max === min) {
-		h = 0; // Grayscale
-	} else {
-		switch (max) {
-			case r:
-				h = (g - b) / d + (g < b ? 6 : 0);
-				break;
-			case g:
-				h = (b - r) / d + 2;
-				break;
-			case b:
-				h = (r - g) / d + 4;
-				break;
-		}
-		h! /= 6;
-	}
-	return [h ?? 0, s, v];
-}
-
-/**
- * Converts HSV color values back to RGB
- *
- * @param h - Hue (0-360)
- * @param s - Saturation (0-1)
- * @param v - Value/Brightness (0-1)
- * @returns [red, green, blue] components in 0-255 range
- */
-function hsvToRgb(h: number, s: number, v: number): [number, number, number] {
-	h = h ?? 0;
-	h /= 60; // Convert to 0-6 range
-
-	const c = v * s; // Chroma
-	const x = c * (1 - Math.abs((h % 2) - 1));
-	const m = v - c;
-
-	let r = 0,
-		g = 0,
-		b = 0;
-
-	// Determine RGB values based on hue sector
-	if (0 <= h && h < 1) {
-		r = c;
-		g = x;
-		b = 0;
-	} else if (1 <= h && h < 2) {
-		r = x;
-		g = c;
-		b = 0;
-	} else if (2 <= h && h < 3) {
-		r = 0;
-		g = c;
-		b = x;
-	} else if (3 <= h && h < 4) {
-		r = 0;
-		g = x;
-		b = c;
-	} else if (4 <= h && h < 5) {
-		r = x;
-		g = 0;
-		b = c;
-	} else if (5 <= h && h < 6) {
-		r = c;
-		g = 0;
-		b = x;
-	}
-
-	// Convert back to 0-255 range
-	r = Math.round((r + m) * 255);
-	g = Math.round((g + m) * 255);
-	b = Math.round((b + m) * 255);
-
-	return [r, g, b];
-}
-
-/**
- * Converts a hex color string to HSL (Hue, Saturation, Lightness)
- *
- * Used for color manipulation in the UI and for creating color variations.
- * HSL is more intuitive for color adjustments than RGB.
- *
- * @param hex - Hex color string (e.g., "#FF0000" or "FF0000")
- * @returns Object with h (0-360), s (0-100), l (0-100) values
- */
-export function hexToHSL(hex: string) {
-	// Remove the # if present
-	hex = hex.replace("#", "");
-
-	// Parse the hex values - handle both 3 and 6 character formats
-	let r = 0,
-		g = 0,
-		b = 0;
-	if (hex.length === 3) {
-		// Expand 3-char hex (e.g., "F0A" -> "FF00AA")
-		r = parseInt(hex[0] + hex[0], 16);
-		g = parseInt(hex[1] + hex[1], 16);
-		b = parseInt(hex[2] + hex[2], 16);
-	} else if (hex.length === 6) {
-		// Standard 6-char hex format
-		r = parseInt(hex.substring(0, 2), 16);
-		g = parseInt(hex.substring(2, 4), 16);
-		b = parseInt(hex.substring(4, 6), 16);
-	}
-
-	// Normalize RGB values to 0-1 range
-	r /= 255;
-	g /= 255;
-	b /= 255;
-
-	// Find the maximum and minimum values for HSL calculation
-	const max = Math.max(r, g, b);
-	const min = Math.min(r, g, b);
-	let h = 0,
-		s = 0;
-	const l = (max + min) / 2; // Lightness is the average of max and min
-
-	// Calculate saturation and hue
-	if (max !== min) {
-		const d = max - min;
-		// Saturation calculation depends on lightness
-		s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-		// Calculate hue based on which component is dominant
-		switch (max) {
-			case r:
-				h = (g - b) / d + (g < b ? 6 : 0);
-				break;
-			case g:
-				h = (b - r) / d + 2;
-				break;
-			case b:
-				h = (r - g) / d + 4;
-				break;
-		}
-		h /= 6; // Normalize to 0-1
-	}
-
-	// Convert to standard HSL ranges
-	return {
-		h: Math.round(h * 360), // Hue: 0-360 degrees
-		s: Math.round(s * 100), // Saturation: 0-100%
-		l: Math.round(l * 100), // Lightness: 0-100%
-	};
-}
-
-/**
- * Converts HSL color values to a hex color string
- *
- * Inverse of hexToHSL - converts HSL values back to hex format
- * for use in CSS and other color applications.
- *
- * @param h - Hue (0-360 degrees)
- * @param s - Saturation (0-100%)
- * @param l - Lightness (0-100%)
- * @returns Hex color string (e.g., "#FF0000")
- */
-export function hslToHex(h: number, s: number, l: number) {
-	// Normalize HSL values to 0-1 range
-	s /= 100;
-	l /= 100;
-
-	// Calculate chroma (color intensity)
-	const c = (1 - Math.abs(2 * l - 1)) * s;
-	const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-	const m = l - c / 2; // Amount of white/black to add
-
-	let r = 0,
-		g = 0,
-		b = 0;
-
-	// Convert to RGB based on hue sector (60-degree segments)
-	if (0 <= h && h < 60) {
-		r = c;
-		g = x;
-		b = 0;
-	} else if (60 <= h && h < 120) {
-		r = x;
-		g = c;
-		b = 0;
-	} else if (120 <= h && h < 180) {
-		r = 0;
-		g = c;
-		b = x;
-	} else if (180 <= h && h < 240) {
-		r = 0;
-		g = x;
-		b = c;
-	} else if (240 <= h && h < 300) {
-		r = x;
-		g = 0;
-		b = c;
-	} else if (300 <= h && h < 360) {
-		r = c;
-		g = 0;
-		b = x;
-	}
-
-	// Convert to 0-255 range
-	r = Math.round((r + m) * 255);
-	g = Math.round((g + m) * 255);
-	b = Math.round((b + m) * 255);
-
-	// Convert to hex string with proper padding
-	const toHex = (n: number) => n.toString(16).padStart(2, "0");
-	return "#" + toHex(r) + toHex(g) + toHex(b);
-}
 
 /**
  * Renders virtual lipstick on the user's lips in real-time
@@ -596,67 +364,27 @@ export function renderLipstick(
 		mainCanvas.height
 	);
 
-	// Parse lipColor to HSV
+	// Parse lipColor to RGB
 	const hex = lipColor.replace("#", "");
-	const r = parseInt(hex.substring(0, 2), 16);
-	const g = parseInt(hex.substring(2, 4), 16);
-	const b = parseInt(hex.substring(4, 6), 16);
-	const [targetH, targetS, targetV0] = rgbToHsv(r, g, b);
-	let targetV = targetV0;
+	const targetR = parseInt(hex.substring(0, 2), 16);
+	const targetG = parseInt(hex.substring(2, 4), 16);
+	const targetB = parseInt(hex.substring(4, 6), 16);
 
-	// Dynamic lighting adaptation
-	let sumV = 0,
-		count = 0;
-	for (let j = 0; j < maskData.data.length; j += 4) {
-		const alpha = maskData.data[j + 3] / 255;
-		if (alpha > 0.1) {
-			const [, , v] = rgbToHsv(
-				frame.data[j],
-				frame.data[j + 1],
-				frame.data[j + 2]
-			);
-			sumV += v;
-			count++;
-		}
-	}
-	const avgV = count > 0 ? sumV / count : 0.5;
-	targetV = Math.max(0.15, Math.min(1, avgV + 0.15));
-
-	// Texture-preserving blending
+	// Simple color blending without excessive processing
 	for (let j = 0; j < maskData.data.length; j += 4) {
 		const alpha = maskData.data[j + 3] / 255;
 		if (alpha > 0.05) {
-			// Get original pixel HSV
-			const [origH, origS, v] = rgbToHsv(
-				frame.data[j],
-				frame.data[j + 1],
-				frame.data[j + 2]
-			);
-
-			// Blend hue/sat, preserve value (texture)
-			const newH = targetH * 0.85 + origH * 0.15;
-			const newS = Math.max(origS, targetS * 0.85);
-			let newV = v * (1 - alpha) + targetV * alpha;
-
-			// For matte, reduce gloss
-			if (finish === "matte") newV *= 0.97;
-
-			// For gloss, add highlight
-			if (finish === "gloss" && v > 0.85 && origS < 0.3) {
-				newV = Math.min(1, newV + 0.1);
-			}
-
-			const [nr, ng, nb] = hsvToRgb(newH, newS, newV);
-			const featherAlpha = Math.min(1, alpha * 1.1);
+			// Simple alpha blending with the target color
+			const blendFactor = Math.min(1, alpha * 0.9);
 
 			frame.data[j] = Math.round(
-				nr * featherAlpha + frame.data[j] * (1 - featherAlpha)
+				targetR * blendFactor + frame.data[j] * (1 - blendFactor)
 			);
 			frame.data[j + 1] = Math.round(
-				ng * featherAlpha + frame.data[j + 1] * (1 - featherAlpha)
+				targetG * blendFactor + frame.data[j + 1] * (1 - blendFactor)
 			);
 			frame.data[j + 2] = Math.round(
-				nb * featherAlpha + frame.data[j + 2] * (1 - featherAlpha)
+				targetB * blendFactor + frame.data[j + 2] * (1 - blendFactor)
 			);
 		}
 	}
@@ -708,6 +436,8 @@ export async function startLipstickAR(
 	canvasEl: HTMLCanvasElement,
 	color: string
 ) {
+	console.log("AR: Starting with color:", color);
+
 	// Initialize camera and face detection
 	await setupCamera({ current: videoEl });
 	const faceLandmarker = await loadFaceLandmarker();
@@ -716,6 +446,13 @@ export async function startLipstickAR(
 	let prevLandmarks: Landmark[] | null = null;
 	const SMOOTHING = 0.5; // Controls how much smoothing is applied
 	let running = true;
+	let currentColor = color;
+
+	// Function to update color dynamically
+	const updateColor = (newColor: string) => {
+		console.log("AR: Updating color from", currentColor, "to", newColor);
+		currentColor = newColor;
+	};
 
 	/**
 	 * Main rendering loop - runs continuously at 60fps
@@ -741,7 +478,7 @@ export async function startLipstickAR(
 				{ current: canvasEl },
 				prevLandmarks,
 				landmarks,
-				color,
+				currentColor,
 				SMOOTHING,
 				"matte"
 			);
@@ -763,8 +500,11 @@ export async function startLipstickAR(
 	// Start the rendering loop
 	render();
 
-	// Return cleanup function to stop AR experience
-	return () => {
-		running = false;
+	// Return cleanup function and color update function
+	return {
+		stop: () => {
+			running = false;
+		},
+		updateColor: updateColor,
 	};
 }

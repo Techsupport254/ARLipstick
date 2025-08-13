@@ -44,16 +44,24 @@ export default function LoginPage() {
 		const auth = getAuth(app);
 		const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
 			if (firebaseUser) {
-				const idToken = await firebaseUser.getIdToken();
-				const res = await fetch("/api/auth", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ idToken }),
-				});
-				const data = await res.json();
-				setUser(data.user);
-				console.log("User object (onAuthStateChanged):", data.user);
-				router.replace("/dashboard");
+				// Only handle auth state changes for non-Google sign-ins
+				// Google sign-ins are handled in handleGoogleLogin
+				if (
+					!firebaseUser.providerData.some(
+						(provider) => provider.providerId === "google.com"
+					)
+				) {
+					const idToken = await firebaseUser.getIdToken();
+					const res = await fetch("/api/auth", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ idToken }),
+					});
+					const data = await res.json();
+					setUser(data.user);
+					console.log("User object (onAuthStateChanged):", data.user);
+					router.replace("/dashboard");
+				}
 			}
 		});
 		return () => unsubscribe();
