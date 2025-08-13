@@ -9,12 +9,7 @@ export default async function Home() {
 	let error = "";
 
 	try {
-		const res = await fetch(
-			`${
-				process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-			}/api/products`,
-			{ cache: "no-store" }
-		);
+		const res = await fetch(`/api/products`, { cache: "no-store" });
 		if (!res.ok) throw new Error("Failed to fetch products");
 		const data = await res.json();
 		products = data.map((p: any) => ({
