@@ -23,7 +23,7 @@ export default function ARLipstickTryOn({
 		if (!video || !canvas) return;
 
 		function syncCanvasSize() {
-			if (video.videoWidth && video.videoHeight) {
+			if (video && canvas && video.videoWidth && video.videoHeight) {
 				canvas.width = video.videoWidth;
 				canvas.height = video.videoHeight;
 			}

@@ -101,7 +101,7 @@ function ARLipstickTryOn({ color }: { color: string }) {
 		return () => {
 			console.log("ARLipstickTryOn component unmounting");
 		};
-	}, []);
+	}, [color]);
 
 	return (
 		<div className="relative w-full max-w-3xl flex items-center justify-center bg-gradient-to-br from-pink-100 via-white to-purple-100 rounded-xl sm:rounded-2xl border border-pink-200 shadow-lg overflow-hidden mb-6 sm:mb-8 min-h-[220px] sm:min-h-[320px]">
